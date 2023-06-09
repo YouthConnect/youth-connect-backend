@@ -1,2 +1,12 @@
 # youth-connect-backend
-The App that integrates a safe and secure place without all of the extra fluff you get from everyone else. A cool place for a safe space!
+To create a safe space for interaction between users, where they can share, collaborate, and seek help with homework or related topics. The app aims to provide a platform that ensures privacy, data security, and user-friendly features for effective communication.
+
+### Links and Resources
+
+- ![Project Prep #1](./assets/Projectprep1.png)
+- ![Project Prep #2](./assets/Projectprep2.png)
+- ![Github Projects](https://github.com/orgs/YouthConnect/projects/1/views/1)
+- ![UML]()
+
+### Collaborators
+Emmanuel Gonzales, Ethan Storm, Kaeden O'Meara, Eva Grace Smith, Coriana Williams
