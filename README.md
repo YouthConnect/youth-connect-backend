@@ -1,8 +1,10 @@
 # youth-connect-backend
 
-To create a safe space for interaction between users, where they can share, collaborate, and seek help with homework or related topics. The app aims to provide a platform that ensures privacy, data security, and user-friendly features for effective communication.
+## The purpose of Youth Connect
 
-## Authors:
+To create a safe space for interaction between users, where they can share, collaborate, and seek help with homework or related topics. The app aims to provide a platform that ensures privacy, data security, and user-friendly features for effective communication. The greatest emphasis of the app is controlling interactions and groupd to keep everyone safe.
+
+## Authors
 
 * [Ethan Storm](https://github.com/ShadowDraco)
 * [Kaeden O'Meara](https://github.com/KaedenOC)
@@ -12,10 +14,19 @@ To create a safe space for interaction between users, where they can share, coll
 
 ### Links and Resources
 
-- ![Project Prep #1](./assets/Projectprep1.png)
-- ![Project Prep #2](./assets/Projectprep2.png)
-- ![Project Prep #4](./assets/Projectprep4.png)
-- ![UML](./assets/UML.png)
-- [Github Projects](https://github.com/orgs/YouthConnect/projects/1/views/1)
+* ![Project Prep #1](./assets/Projectprep1.png)
+* ![Project Prep #2](./assets/Projectprep2.png)
+* ![Project Prep #4](./assets/Projectprep4.png)
+* ![UML](./assets/UML.png)
+* [Github Projects](https://github.com/orgs/YouthConnect/projects/1/views/1)
 
+#### Day 1 Tasks
 
+* Proof of life for terminal- kit
+* Install packages
+* Express server and Auth Routes- Ethan and Emmanuel
+*
+
+* Groups
+* kaeden, Eva, Coriana - Socket client/server
+* Emmanuel Gonzales,Ethan - express server/auth/database
