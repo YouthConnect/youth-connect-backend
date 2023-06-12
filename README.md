@@ -7,7 +7,7 @@ To create a safe space for interaction between users, where they can share, coll
 * [Ethan Storm](https://github.com/ShadowDraco)
 * [Kaeden O'Meara](https://github.com/KaedenOC)
 * [Eva Grace Smith](https://github.com/EvaGraceSmith)
-*  [Coriana Williams](https://github.com/Coriana1)
+* [Coriana Williams](https://github.com/Coriana1)
 * [Emmanuel Gonzales](https://github.com/Emmanuel-Gonzales)
 
 ### Links and Resources
