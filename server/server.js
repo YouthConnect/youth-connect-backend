@@ -5,7 +5,7 @@ const { auth, requiresAuth } = require("express-openid-connect");
 
 router.get('/hello', (req, res,next) => {
   res.status(200).send('hello');
-});
+})
 
 // The /profile route will show the user profile as JSON
 router.get('/profile', requiresAuth(), (req, res) => {

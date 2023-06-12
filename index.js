@@ -15,18 +15,23 @@ const io = new Server(server);
 
 //? require Auth0 functions
 const { auth, requiresAuth } = require('express-openid-connect');
+
 // Create an AUTH 0 config with our ACTUAL parameters
 const config = {
   authRequired: false,
   auth0Logout: true,
   baseURL: `${process.env.baseURL}`,
-  clientID: `${process.env.cliendID}`,
+  clientID: `${process.env.clientID}`,
   issuerBaseURL: `${process.env.issuerBaseURL}`,
   secret: `${process.env.secret}`
 };
 
 
 app.use(express.json());
+
+//? Above the auth becausewe don't want any auth stuff here for now during testing.
+const v1 = require('./server/routes/v1')
+app.use('/v1', v1)
 
 // The `auth` router attaches /login, /logout
 // and /callback routes to the baseURL
@@ -43,6 +48,7 @@ const testRouter = require('./server/server.js')
 app.use(testRouter)
 
 
+
 const {
     relayMessage
 } = require('./socketHandlers/handlerIndex.js');
@@ -52,6 +58,10 @@ io.on('connection', (socket) => {
     console.log('a user connected');
 
     socket.on('SEND MESSAGE', payload => relayMessage(payload, socket));
+    socket.on("BASIC INPUT", (payload) => {
+    socket.emit("UPDATE VALUE", payload);
+    // socket.on('LOGIN',)
+  });
 });
 
 server.listen(PORT, () => {

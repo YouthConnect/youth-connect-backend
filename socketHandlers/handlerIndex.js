@@ -17,8 +17,10 @@ const receivedMessage = (payload, socket) => {
 }
 
 const updateValue = (payload, state) => {
-  state[payload.valueToUpdate] = payload.input
-}
+  state[payload.valueToUpdate] = payload.input;
+  state[payload.stateToUpdate] = false; // turn off this state
+  state.menu = true; // go back to menu after finished with function
+};
 
 const relayMessage = (payload, socket) => {
   // relay the message to everyone BUT THE SENDER
