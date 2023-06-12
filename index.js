@@ -1,71 +1,72 @@
 //* The main server index includes express app, socket hub, and auth config/secret */
 
 //Dot env at top just to be safe
-require('dotenv').config()
+require("dotenv").config();
 const PORT = process.env.PORT;
 //? Create express server
-const express = require('express');
+const express = require("express");
 const app = express();
 //? Add web socket capability to express server
-const http = require('http');
+const http = require("http");
 const server = http.createServer(app);
 //? create socket server HUB
 const { Server } = require("socket.io");
 const io = new Server(server);
 
 //? require Auth0 functions
-const { auth, requiresAuth } = require('express-openid-connect');
+const { auth, requiresAuth } = require("express-openid-connect");
 
 // Create an AUTH 0 config with our ACTUAL parameters
 const config = {
   authRequired: false,
   auth0Logout: true,
-  baseURL: `${process.env.baseURL}`,
-  clientID: `${process.env.clientID}`,
-  issuerBaseURL: `${process.env.issuerBaseURL}`,
-  secret: `${process.env.secret}`
+  baseURL: "http://localhost:3001",
+  clientID: "jZMzUBVnwBJ3JxFfre0EaBdQvfwpaK6B",
+  issuerBaseURL: "https://dev-iaagx3vzh22w84ou.us.auth0.com",
+  secret: "LONG_RANDOM_STRING",
 };
 
-
 app.use(express.json());
-
+/*
 //? Above the auth becausewe don't want any auth stuff here for now during testing.
-const v1 = require('./server/routes/v1')
-app.use('/v1', v1)
-
+const v1 = require("./server/routes/v1");
+app.use("/v1", v1);
+*/
 // The `auth` router attaches /login, /logout
 // and /callback routes to the baseURL
 app.use(auth(config));
 
-
-app.get('/', (req, res) => {
-    res.send(
-        req.oidc.isAuthenticated() ? 'Logged in' : 'Logged out'
-    )
+app.get("/", (req, res) => {
+  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
 });
 
-const testRouter = require('./server/server.js')
-app.use(testRouter)
+const testRouter = require("./server/server.js");
+app.use(testRouter);
 
-
-
-const {
-    relayMessage
-} = require('./socketHandlers/handlerIndex.js');
+const { relayMessage } = require("./socketHandlers/handlerIndex.js");
 
 //pass in the socket(that connected/made a request) to each of these functions
-io.on('connection', (socket) => {
-    console.log('a user connected');
+io.on("connection", (socket) => {
+  console.log("a user connected");
 
-    socket.on('SEND MESSAGE', payload => relayMessage(payload, socket));
-    socket.on("BASIC INPUT", (payload) => {
+  socket.onAny((event, payload) => {
+    console.log("EVENT:", event, payload);
+  });
+
+  socket.on("SEND MESSAGE", (payload) => relayMessage(payload, socket));
+  socket.on("BASIC INPUT", (payload) => {
     socket.emit("UPDATE VALUE", payload);
     // socket.on('LOGIN',)
+  });
+
+  socket.on("MESSAGE", (payload) => {
+    //console.log("RECEIVED MESSAGE", payload);
+    socket.broadcast.emit("MESSAGE", payload);
+    // when server receives a message, make the client start their prompt so it continues the cycle
+    socket.emit("RESTART MESSAGE PROMPT", {});
   });
 });
 
 server.listen(PORT, () => {
-    console.log('listening on *:', PORT);
+  console.log("listening on *:", PORT);
 });
-
-

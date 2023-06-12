@@ -1,20 +1,21 @@
-'use strict';
+"use strict";
 
 const changeState = (payload, socket) => {
-  socket.emit('CHANGE STATE', payload)
-}
+  socket.emit("CHANGE STATE", payload);
+};
 
 const sendMessage = (payload, socket) => {
-  socket.emit('SEND MESSAGE', payload)
-}
+  socket.emit("SEND MESSAGE", payload);
+};
 
-const receiveMessage = (term, payload, socket) => {
-  term.blue('message received', JSON.stringify(payload))
-}
+const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
+  state[valueToUpdate] = payload.valueToUpdate;
+  term.blue("\n\nmessage: ", payload.input);
+};
 
 const receivedMessage = (payload, socket) => {
-  socket.emit('RECEIVED MESSAGE', payload)
-}
+  socket.emit("RECEIVED MESSAGE", payload);
+};
 
 const updateValue = (payload, state) => {
   state[payload.valueToUpdate] = payload.input;
@@ -24,9 +25,8 @@ const updateValue = (payload, state) => {
 
 const relayMessage = (payload, socket) => {
   // relay the message to everyone BUT THE SENDER
-  socket.broadcast.emit('RELAY MESSAGE', payload)
-}
-
+  socket.broadcast.emit("RELAY MESSAGE", payload);
+};
 
 module.exports = {
   sendMessage,
@@ -34,5 +34,5 @@ module.exports = {
   receiveMessage,
   receivedMessage,
   updateValue,
-  relayMessage
-}
+  relayMessage,
+};
