@@ -30,3 +30,5 @@ To create a safe space for interaction between users, where they can share, coll
 * Groups
 * kaeden, Eva, Coriana - Socket client/server
 * Emmanuel Gonzales,Ethan - express server/auth/database
+
+
