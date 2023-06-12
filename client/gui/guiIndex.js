@@ -67,9 +67,6 @@ term.on('key', (name, matches, data) => {
       //? pass in the terminal, value to update, and socket into the function to update State and values
       basicInputPrompt(term, 'basicPrompt', socket);
 
-      // reset the state after its finished
-      state.prompt = false
-      state.menu = true
     }
 
     if (name === 'v') {

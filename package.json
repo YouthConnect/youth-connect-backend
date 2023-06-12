@@ -7,7 +7,9 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "start-client-dev": "nodemon ./client/index",
-    "test": "jest --verbose --coverage"
+    "test": "jest --verbose --coverage",
+    "init:config": "sequelize init:config",
+    "db:create": "sequelize db:create"
   },
   "keywords": [],
   "author": "",
@@ -15,17 +17,21 @@
   "dependencies": {
     "aedos": "^1.1.4",
     "auth0": "^3.4.0",
+    "base-64": "^1.0.0",
+    "bcrypt": "^5.1.0",
     "dotenv": "^16.1.4",
     "eslint": "^8.42.0",
     "express": "^4.18.2",
     "express-openid-connect": "^2.16.0",
     "figlet": "^1.6.0",
     "jest": "^29.5.0",
+    "jsonwebtoken": "^9.0.0",
     "pg": "^8.11.0",
     "sequelize": "^6.32.0",
     "sequelize-cli": "^6.6.1",
     "socket.io": "^4.6.2",
     "socket.io-client": "^4.6.2",
+    "sqlite3": "^5.1.6",
     "terminal-kit": "^3.0.0"
   }
 }

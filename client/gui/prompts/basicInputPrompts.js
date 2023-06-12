@@ -1,4 +1,4 @@
-const { newLine } = require("../lib/index");
+const { newLine } = require('../lib/index');
 
 //instead of returning user input use socket.emit to control the MAIN terminal
 const basicInputPrompt = async (term, valueToUpdate, socket) => {
@@ -7,7 +7,7 @@ newLine(term, false)
 term('please enter a prompt: ')
 
 // do a function with the passed in terminal object
-let userInput= await term.inputField(function (error, input) {
+let userInput = await term.inputField(function (error, input) {
 //set color and effects
 term.green("\nYour prompt is '%s'\n", input)
 //update state through socket client because is doesn't work through other methods
