@@ -43,6 +43,7 @@ io.on("connection", (socket) => {
   socket.on("BASIC INPUT", (payload) => {
     socket.emit("UPDATE VALUE", payload);
   });
+  
     socket.on("MESSAGE", (payload) => {
       console.log("MESSAGE:", payload);
       socket.broadcast.emit("MESSAGE", payload);
@@ -61,7 +62,6 @@ io.on("connection", (socket) => {
 
     socket.on("HERES MY CREDENTIALS", payload => {
       authenticate(payload)
-    })
   });
 
   socket.on("MESSAGE", (payload) => {
@@ -70,7 +70,7 @@ io.on("connection", (socket) => {
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("RESTART MESSAGE PROMPT", {});
   });
-
+});
 const authenticate = (payload) => {
   console.log("authenticated", payload.username, payload.password);
 };
