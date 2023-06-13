@@ -19,6 +19,15 @@ const io = new Server(server);
 
 const { relayMessage } = require("./socketHandlers/handlerIndex.js");
 
+// define global variables
+
+//?Update this laterlet roomOptions = await database.get("rooms")
+let roomOptions = [
+  'Room1',
+  'Room2',
+  'Room3'
+];
+
 //pass in the socket(that connected/made a request) to each of these functions
 io.on("connection", (socket) => {
   console.log("a user connected");
@@ -35,7 +44,7 @@ io.on("connection", (socket) => {
     //console.log("RECEIVED MESSAGE", payload);
     socket.broadcast.emit("MESSAGE", payload);
     // when server receives a message, make the client start their prompt so it continues the cycle
-    socket.emit("RESTART MESSAGE PROMPT", {});
+    socket.emit("GO BACK TO ROOM", {});
   });
 
   socket.on('UPDATE USERNAME', payload => {
@@ -57,8 +66,12 @@ io.on("connection", (socket) => {
 
   // handle join room event
   socket.on('join', (room) => {
-    if (roomOptions.contains(room)) {
-      // if they permission join
+    if (roomOptions.includes(room)) {
+      // check if they have permission join
+
+      // update the client state with the room name
+      socket.emit('UPDATE CURRENT ROOM', room)
+
 
       // they join
       socket.join(room);
@@ -75,12 +88,6 @@ io.on("connection", (socket) => {
 
 });
 
-//?Update this laterlet roomOptions = await database.get("rooms")
-let roomOptions = [
-  'Room1',
-  'Room2',
-  'Room3'
-];
 
 
 

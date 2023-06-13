@@ -1,22 +1,24 @@
 const { newLine } = require("../lib/index");
 
 //instead of returning user input use socket.emit to control the MAIN terminal
-const messagePrompt = async (term, valueToUpdate, socket) => {
+const messagePrompt = async (term, socket) => {
   // name the input prompt by 'console logging' the name
   newLine(term, false);
-  term.red("MESSAGE ROOM: ");
+  term.red("Send Message - or press ESCAPE to cancel: ");
   newLine(term);
-  newLine(term);
-  term.red("please enter a message: ");
+  term.red("message: ");
 
   // do a function with the passed in terminal object
   let userInput = await term.inputField({cancelable: true}, function (error, input) {
     //set color and effects
-    console.log(input)
-    if (!input === undefined) {
+
+    if (input === undefined) {
+
+    } else {
+
       term.green("\nYour message is '%s'\n", input);
       //update state through socket client because is doesn't work through other methods
-      socket.emit("MESSAGE", { input, valueToUpdate });
+      socket.emit("MESSAGE", input);
     }
 
   }).promise; //? Create this input as a promise so it can be awaited and returned

@@ -29,7 +29,7 @@ const newLine = (term, dash = true) => {
 //this will display the introductory text in the terminal-kit
 
 // TODO: this is a good place to introduce the user to the terminal-kit and provide some basic instructions
-const introduction = term => {
+const mainMenu = term => {
 	// immediately clear the screen
 	clearScreen(term);
 	// use the terminal-kit
@@ -52,12 +52,36 @@ const introduction = term => {
 	term.red('in order to close this terminal, CTRL+C or END');
 	newLine(term.green);
 	newLine(term.red.bold.bgGreen);
-	term.gray(
-		'see you can also pass in colors and bold etc to these custom functions easily'
-	);
 	newLine(term, false);
 	newLine(term, false); // easily decide whether or not to include that dash
-	term.blue('there is a lot to see');
+};
+
+
+
+// CREATE A ROOM MENU LOG
+
+const roomMenu = (term, selectedRoom) => {
+	//? If there is no room say please press r to select a room
+	// immediately clear the screen
+	clearScreen(term);
+	newLine(term);
+	newLine(term);
+	if (!selectedRoom) {
+		term.blue('Please press "r" to see a list of rooms');
+	}
+	else {
+		term.magenta(`WELCOME TO ${selectedRoom}`);
+	}
+	newLine(term);
+	term.blue('Please press "m" to start a message');
+	newLine(term);
+
+	if (selectedRoom) {
+		term.blue('Please press "CTRL + r" to see a list of rooms');
+	}
+	newLine(term);
+	term.blue('Please press ESCAPE to return to main menu');
+	newLine(term);
 };
 
 module.exports = {
@@ -65,5 +89,6 @@ module.exports = {
 	clearWithLines,
 	clearScreen,
 	newLine,
-	introduction,
+	mainMenu,
+	roomMenu
 };
