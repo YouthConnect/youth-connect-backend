@@ -45,20 +45,13 @@ socket.on("UPDATE PASSWORD", (payload) => {
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
   socket.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
-  introduction(term);
   state.menu = true;
 
 })
-//
 
-//
-
-let basicPrompt = "";
-
-//* oof of life message */
+//* proof of life message */
 socket.emit("SEND MESSAGE", "Hello! I am the socket client!");
 
-//
 
 // create a state to represent information like what menu/action is happening right
 const state = {
@@ -74,7 +67,7 @@ introduction(term);
 
 // get mouse clicks and scroll wheel
 term.on("mouse", (name, matches, data) => {
-  console.log("mouse:", name, data);
+  //console.log("mouse:", name, data);
 
   if (name === "MOUSE_RIGHT_BUTTON_PRESSED") {
   }
@@ -131,8 +124,6 @@ term.on("key", (name, matches, data) => {
       console.log("RETURNING TO MENU");
       state.chat = false;
       state.menu = true;
-      term.asyncCleanup();
-      term.grabInput(true);
     }
   }
 });

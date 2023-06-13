@@ -43,11 +43,12 @@ io.on("connection", (socket) => {
   socket.on("BASIC INPUT", (payload) => {
     socket.emit("UPDATE VALUE", payload);
   });
-    socket.on("MESSAGE", (payload) => {
-      console.log("MESSAGE:", payload);
-      socket.broadcast.emit("MESSAGE", payload);
-      //socket.to('message-room', payload)
-    });
+  socket.on("MESSAGE", (payload) => {
+    //console.log("RECEIVED MESSAGE", payload);
+    socket.broadcast.emit("MESSAGE", payload);
+    // when server receives a message, make the client start their prompt so it continues the cycle
+    socket.emit("RESTART MESSAGE PROMPT", {});
+  });
     socket.on('UPDATE USERNAME', payload => {
       socket.emit("UPDATE USERNAME", payload)
     });
@@ -61,21 +62,16 @@ io.on("connection", (socket) => {
 
     socket.on("HERES MY CREDENTIALS", payload => {
       authenticate(payload)
-    })
+
   });
 
-  socket.on("MESSAGE", (payload) => {
-    //console.log("RECEIVED MESSAGE", payload);
-    socket.broadcast.emit("MESSAGE", payload);
-    // when server receives a message, make the client start their prompt so it continues the cycle
-    socket.emit("RESTART MESSAGE PROMPT", {});
-  });
+
 
 const authenticate = (payload) => {
   console.log("authenticated", payload.username, payload.password);
 };
 
-
+});
 
 server.listen(PORT, () => {
   console.log("listening on *:", PORT);
