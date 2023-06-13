@@ -5,26 +5,14 @@
 //Dot env at top just to be safe
 require("dotenv").config();
 const PORT = process.env.PORT;
-//? Create express server
-const express = require("express");
-const app = express();
+
+const { server } = require('./server/server.js')
 //? Add web socket capability to express server
 const http = require("http");
 const server = http.createServer(app);
 //? create socket server HUB
 const { Server } = require("socket.io");
 const io = new Server(server);
-
-app.use(express.json());
-
-//? Above the auth becausewe don't want any auth stuff here for now during testing.
-const v1 = require('./server/routes/v1')
-app.use("/v1", v1);
-
-
-app.get("/", (req, res) => {
-  res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
-});
 
 const testRouter = require("./server/server.js");
 app.use(testRouter);
@@ -49,30 +37,56 @@ io.on("connection", (socket) => {
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("RESTART MESSAGE PROMPT", {});
   });
-    socket.on('UPDATE USERNAME', payload => {
-      socket.emit("UPDATE USERNAME", payload)
-    });
-    socket.on('UPDATE PASSWORD', payload => {
-      socket.emit("UPDATE PASSWORD", payload)
-    });
 
-    socket.on("VERIFY USER", (payload) => {
-      socket.emit("GIVE ME YOUR CREDENTIALS", {})
-    })
+  socket.on('UPDATE USERNAME', payload => {
+    socket.emit("UPDATE USERNAME", payload)
+  });
 
-    socket.on("HERES MY CREDENTIALS", payload => {
-      authenticate(payload)
+  socket.on('UPDATE PASSWORD', payload => {
+    socket.emit("UPDATE PASSWORD", payload)
+  });
+
+  socket.on("VERIFY USER", (payload) => {
+    socket.emit("GIVE ME YOUR CREDENTIALS", {})
+  })
+
+  socket.on("HERES MY CREDENTIALS", payload => {
+    authenticate(payload)
 
   });
 
+  // handle join room event
+  socket.on('join', (room) => {
+    if (roomOptions.contains(room)) {
+      // if they permission join
 
+      // they join
+      socket.join(room);
+      console.log(`${socket.id} joined the ${room} room.`);
+    } else {
+      console.log(`${socket.id} tried to join an invalid room: ${room}`);
+    }
 
-const authenticate = (payload) => {
-  console.log("authenticated", payload.username, payload.password);
-};
+  });
+
+  const authenticate = (payload) => {
+    console.log("authenticated", payload.username, payload.password);
+  }
 
 });
+
+//?Update this laterlet roomOptions = await database.get("rooms")
+let roomOptions = [
+  'Room1',
+  'Room2',
+  'Room3'
+];
+
+
 
 server.listen(PORT, () => {
   console.log("listening on *:", PORT);
 });
+
+// export the room options so it can be used by the client
+module.exports = roomOptions

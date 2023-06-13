@@ -41,13 +41,15 @@ const introduction = term => {
 	newLine(term);
 	term.blue('Please press "l" to login');
 	newLine(term);
+	term.blue('Please press "p" to enter a prompt');
+	newLine(term);
 	term.blue('Please press "m" to start a message');
 	newLine(term);
 	term.blue('Please press "r" to see a list of rooms');
 	newLine(term);
 	term.blue('Please press ESCAPE to return to main menu');
 	newLine(term);
-	term.red('in order to close this terminal, right click the mouse');
+	term.red('in order to close this terminal, CTRL+C or END');
 	newLine(term.green);
 	newLine(term.red.bold.bgGreen);
 	term.gray(

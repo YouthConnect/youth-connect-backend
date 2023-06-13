@@ -26,6 +26,7 @@ const usernamePrompt = async (term, socket) => {
 
     }).promise//? Create this input as a promis so it can be awaited and returned
 
+    console.log(username)
 };
 
 module.exports = usernamePrompt;

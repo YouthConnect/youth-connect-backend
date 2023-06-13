@@ -6,6 +6,8 @@ const term = require("terminal-kit").terminal;
 const { io } = require("socket.io-client");
 const socket = io("http://localhost:3001");
 
+const roomOptions = require('../../index')
+
 //? require functions from the socket client lib that contains basic handlers for our socket client
 const {
   changeState,
@@ -21,6 +23,7 @@ const basicInputPrompt = require("../gui/prompts/basicInputPrompts");
 const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require('./prompts/usernamePrompt');
 const passwordPrompt = require('./prompts/passwordPrompt');
+const roomPrompt = require('./prompts/roomPrompt');
 
 // Socket handlers for the client
 //socket.onAny((event, payload) => receivedMessage(event, payload, socket))
@@ -32,6 +35,7 @@ socket.on("MESSAGE", (payload) => {
 });
 socket.on("RESTART MESSAGE PROMPT", (payload) => {
   messagePrompt(term, 'currentMessage', socket);
+  introduction(term);
 });
 
 socket.on("UPDATE USERNAME", (payload) => {
@@ -87,10 +91,7 @@ term.on("key", (name, matches, data) => {
 
   //? Only grab these letters if the user is not in a prompt.
   if (state.menu) {
-    term("MAIN PAGE:");
-    newLine(term);
-    newLine(term);
-    newLine(term);
+    introduction(term);
     //? Start a prompt command
     if (name === "p") {
       // update the state so the functions work correctly
@@ -121,12 +122,25 @@ term.on("key", (name, matches, data) => {
 
   if (state.chat) {
     if (name === "ESCAPE") {
-      console.log("RETURNING TO MENU");
+      introduction(term);
       state.chat = false;
       state.menu = true;
     }
   }
-});
+
+  if (state.menu) {
+    introduction(term);
+    //? Start a prompt command
+    if (name === "r") {
+      // update the state so the functions work correctly
+      state.menu = false;
+      state.prompt = true;
+      console.log(roomOptions)
+      roomPrompt(term, socket, roomOptions);
+
+
+    }
+}});
 
 //* Make the terminal-kit override the normal terminal and listen for input so we can custom things with it */
 //! When terminal-kit overrides these inputs it needs to have a way to terminate.
