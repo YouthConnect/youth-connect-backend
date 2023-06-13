@@ -18,7 +18,7 @@ const {
 } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
-const { terminate, introduction, newLine } = require("./lib");
+const { terminate, mainMenu, newLine, roomMenu } = require("./lib");
 const basicInputPrompt = require("../gui/prompts/basicInputPrompts");
 const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require('./prompts/usernamePrompt');
@@ -26,16 +26,16 @@ const passwordPrompt = require('./prompts/passwordPrompt');
 const roomPrompt = require('./prompts/roomPrompt');
 
 // Socket handlers for the client
-//socket.onAny((event, payload) => receivedMessage(event, payload, socket))
+// socket.onAny((event, payload) => receivedMessage(event, payload, socket))
 //this is not on the UML
 socket.on("RELAY MESSAGE", (payload) => receiveMessage(term, payload, socket));
 socket.on("UPDATE VALUE", (payload) => updateValue(payload, state));
 socket.on("MESSAGE", (payload) => {
   receiveMessage(term, payload, state, "currentMessage", socket);
 });
-socket.on("RESTART MESSAGE PROMPT", (payload) => {
-  messagePrompt(term, 'currentMessage', socket);
-  introduction(term);
+socket.on("GO BACK TO ROOM", (payload) => {
+  state.room = true;
+  //mainMenu(term);
 });
 
 socket.on("UPDATE USERNAME", (payload) => {
@@ -47,10 +47,16 @@ socket.on("UPDATE PASSWORD", (payload) => {
   socket.emit('VERIFY USER', {})
 })
 
+socket.on("UPDATE CURRENT ROOM",(payload) => {
+  // update the current room state?
+  state.selectedRoom = payload;
+  state.room = true;
+  roomMenu(term, payload)
+});
+
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
   socket.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
   state.menu = true;
-
 })
 
 //* proof of life message */
@@ -64,10 +70,11 @@ const state = {
   chat: false,
   basicPrompt: "null",
   currentMessage: "null",
+  selectedRoom: null
 };
 
-//? introduction to introduce features and concepts of the terminal-kit
-introduction(term);
+//? mainMenu to introduce features and concepts of the terminal-kit
+mainMenu(term);
 
 // get mouse clicks and scroll wheel
 term.on("mouse", (name, matches, data) => {
@@ -91,7 +98,7 @@ term.on("key", (name, matches, data) => {
 
   //? Only grab these letters if the user is not in a prompt.
   if (state.menu) {
-    introduction(term);
+    mainMenu(term);
     //? Start a prompt command
     if (name === "p") {
       // update the state so the functions work correctly
@@ -106,41 +113,66 @@ term.on("key", (name, matches, data) => {
       term.blue(JSON.stringify(state));
     }
 
-    if (name === "m") {
-      state.chat = true;
-      state.menu = false;
-      messagePrompt(term, 'currentMessage', socket);
-    }
-
-
     if (name === 'l') {
       state.chat = true;
       state.menu = false;
       usernamePrompt(term, socket);
     }
+
+    // if in menu and press r
+    if (name === "r") {
+      // update the state so the functions work correctly
+      state.menu = false;
+      state.room = true;
+      //console.log(roomOptions)
+      roomPrompt(term, roomOptions, socket);
+
+
+    }
   }
 
   if (state.chat) {
     if (name === "ESCAPE") {
-      introduction(term);
+      roomMenu(term, state.selectedRoom);
       state.chat = false;
-      state.menu = true;
+      state.room = true;
     }
   }
 
-  if (state.menu) {
-    introduction(term);
+  //TODO- when you select room for the first time view the roomMenu
+  // ? When you press ctl+r view the rooms again
+  //* allow room state see the rooms and join a new room
+  // when we press escape in the room, take us to main menu and do //?socket.leaveRoom()
+
+  if (state.room) {
+    // pass term to use it, and room name to print the room name
+    roomMenu(term, state.selectedRoom);
     //? Start a prompt command
-    if (name === "r") {
-      // update the state so the functions work correctly
-      state.menu = false;
-      state.prompt = true;
-      console.log(roomOptions)
-      roomPrompt(term, socket, roomOptions);
 
-
+    if (name === "m") {
+      state.chat = true;
+      state.room = false;
+      messagePrompt(term, socket);
     }
-}});
+
+    //press r to view rooms function
+    if (name === "CTRL_R"){
+      state.menu = true;
+      state.room = false;
+      roomPrompt(term, roomOptions, socket);
+    }
+
+
+    // press escacpe function
+    if (name === "ESCAPE") {
+      mainMenu(term);
+      state.menu = true;
+      state.room = false;
+    }
+
+}
+
+});
 
 //* Make the terminal-kit override the normal terminal and listen for input so we can custom things with it */
 //! When terminal-kit overrides these inputs it needs to have a way to terminate.
