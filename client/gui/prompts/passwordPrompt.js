@@ -1,0 +1,26 @@
+'use strict';
+
+const { newLine } = require('../lib/index');
+
+//instead of returning user input use socket.emit to control the MAIN terminal
+const passwordPrompt = async (term, socket) => {
+
+    //?get password
+    newLine(term, false)
+
+    term('please enter a password: ') //
+
+    let password = await term.inputField(function (error, input) {
+
+        term.green("\nYour password is '%s'\n", input)
+
+        socket.emit('UPDATE PASSWORD', input)
+
+    }).promise;
+
+
+}//? Create this input as a promis so it can be awaited and returned
+
+
+
+module.exports = passwordPrompt;
