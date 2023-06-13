@@ -14,8 +14,8 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-const testRouter = require("./server/server.js");
-app.use(testRouter);
+// const testRouter = require("./server/server.js");
+// app.use(testRouter);
 
 const { relayMessage } = require("./socketHandlers/handlerIndex.js");
 

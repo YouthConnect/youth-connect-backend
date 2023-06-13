@@ -31,6 +31,7 @@ router.get("/:model/:id", handleGetOne);
 router.post("/:model", handleCreate);
 router.put("/:model/:id", handleUpdate);
 router.delete("/:model/:id", handleDelete);
+router.post("/rooms", handleCreateRoom); // Add the new route for creating rooms
 
 async function handleGetAll(req, res) {
   let allRecords = await req.model.get();
@@ -60,6 +61,12 @@ async function handleDelete(req, res) {
   let id = req.params.id;
   let deletedRecord = await req.model.delete(id);
   res.status(200).json(deletedRecord);
+}
+
+async function handleCreateRoom(req, res) {
+  let roomData = req.body;
+  let newRoom = await Room.create(roomData);
+  res.status(201).json(newRoom);
 }
 
 module.exports = router;
