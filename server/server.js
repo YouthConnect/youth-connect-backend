@@ -1,16 +1,41 @@
-const express = require('express');
-const router = express.Router()
-//? require Auth0 functions
-const { auth, requiresAuth } = require("express-openid-connect");
+"use strict";
 
-router.get('/hello', (req, res,next) => {
-  res.status(200).send('hello');
-})
+const express = require("express");
+const cors = require("cors");
 
-// The /profile route will show the user profile as JSON
-router.get('/profile', requiresAuth(), (req, res) => {
-    res.send(JSON.stringify(req.oidc.user, null, 2));
+const notFoundHandler = require("./error-handlers/404.js");
+const errorHandler = require("./error-handlers/500.js");
+const logger = require("./middleware/logger.js");
+
+const v1Routes = require("./routes/v1.js");
+const v2Routes = require("./routes/v2.js");
+const authRoutes = require("./auth/routes.js");
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use(logger);
+
+app.get("/", (req, res) => {
+  res.status(200).send("Home route!");
 });
 
+// Routes
+app.use(authRoutes);
+app.use("/api/v1", v1Routes);
+app.use("/api/v2", v2Routes);
 
-module.exports = router;
+app.use("*", notFoundHandler);
+app.use(errorHandler);
+
+module.exports = {
+  server: app,
+  start: (port) => {
+    if (!port) {
+      throw new Error("Missing Port");
+    }
+    app.listen(port, () => console.log(`Listening on ${port}`));
+  },
+};

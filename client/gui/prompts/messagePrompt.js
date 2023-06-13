@@ -10,12 +10,15 @@ const messagePrompt = async (term, valueToUpdate, socket) => {
   term.red("please enter a message: ");
 
   // do a function with the passed in terminal object
-  let userInput = await term.inputField(function (error, input) {
+  let userInput = await term.inputField({cancelable: true}, function (error, input) {
     //set color and effects
-    term.green("\nYour prompt is '%s'\n", input);
-    //update state through socket client because is doesn't work through other methods
-    socket.emit("MESSAGE", { input, valueToUpdate });
-    // return the value entered
+    console.log(input)
+    if (!input === undefined) {
+      term.green("\nYour message is '%s'\n", input);
+      //update state through socket client because is doesn't work through other methods
+      socket.emit("MESSAGE", { input, valueToUpdate });
+    }
+
   }).promise; //? Create this input as a promise so it can be awaited and returned
 };
 

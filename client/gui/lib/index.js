@@ -33,15 +33,23 @@ const introduction = term => {
 	// immediately clear the screen
 	clearScreen(term);
 	// use the terminal-kit
-	term.green.underline.bgBlack('Heyyy this is the gui!');
+	// term.green.underline.bgBlack('Heyyy this is the gui!');
 	// use our custom basic function to add a newline easily
 	newLine(term);
 	newLine(term);
-	term.magenta('WELCOME TO THE TERMINAL-KIT');
+	term.magenta('WELCOME TO YOUTH CONNECT');
 	newLine(term);
-	term.blue('Pretty cool huh?');
+	term.blue('Please press "l" to login');
 	newLine(term);
-	term.red('in order to close this terminal, right click the mouse');
+	term.blue('Please press "p" to enter a prompt');
+	newLine(term);
+	term.blue('Please press "m" to start a message');
+	newLine(term);
+	term.blue('Please press "r" to see a list of rooms');
+	newLine(term);
+	term.blue('Please press ESCAPE to return to main menu');
+	newLine(term);
+	term.red('in order to close this terminal, CTRL+C or END');
 	newLine(term.green);
 	newLine(term.red.bold.bgGreen);
 	term.gray(

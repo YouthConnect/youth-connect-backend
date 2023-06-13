@@ -10,7 +10,7 @@ const passwordPrompt = async (term, socket) => {
 
     term('please enter a password: ') //
 
-    let password = await term.inputField(function (error, input) {
+    let password = await term.inputField( function (error, input) {
 
         term.green("\nYour password is '%s'\n", input)
 
@@ -18,9 +18,7 @@ const passwordPrompt = async (term, socket) => {
 
     }).promise;
 
-
-}//? Create this input as a promis so it can be awaited and returned
-
+}//? Create this input as a promise so it can be awaited and returned
 
 
 module.exports = passwordPrompt;
