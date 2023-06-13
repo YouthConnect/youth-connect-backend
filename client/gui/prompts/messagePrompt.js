@@ -18,7 +18,7 @@ const messagePrompt = async (term, socket) => {
 
       term.green("\nYour message is '%s'\n", input);
       //update state through socket client because is doesn't work through other methods
-      socket.emit("MESSAGE", input);
+      socket.emit("MESSAGE", {input, room, user});
     }
 
   }).promise; //? Create this input as a promise so it can be awaited and returned

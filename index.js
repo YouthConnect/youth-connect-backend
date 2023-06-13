@@ -21,7 +21,7 @@ const { relayMessage } = require("./socketHandlers/handlerIndex.js");
 
 // define global variables
 
-//?Update this laterlet roomOptions = await database.get("rooms")
+//?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = [
   'Room1',
   'Room2',
@@ -42,7 +42,12 @@ io.on("connection", (socket) => {
   });
   socket.on("MESSAGE", (payload) => {
     //console.log("RECEIVED MESSAGE", payload);
+    //? Check for profanity
+    //? Sanitize it (turn bad word into f***) --> use AEDOS'
+    //* Then send it to the other clients */
     socket.broadcast.emit("MESSAGE", payload);
+    //* Then send it to database */
+    // EXAMPLE -> await axios.post('localhost/messages', {text, room, user})
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("GO BACK TO ROOM", {});
   });
@@ -60,8 +65,8 @@ io.on("connection", (socket) => {
   })
 
   socket.on("HERES MY CREDENTIALS", payload => {
+    //TODO transform this to use await axios.post('/signin') and handle that
     authenticate(payload)
-
   });
 
   // handle join room event
@@ -84,6 +89,8 @@ io.on("connection", (socket) => {
 
   const authenticate = (payload) => {
     console.log("authenticated", payload.username, payload.password);
+
+    //? return the authenticated users's info (includes their token)
   }
 
 });
