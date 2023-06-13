@@ -19,7 +19,7 @@ const receivedMessage = (payload, socket) => {
   socket.emit("RECEIVED MESSAGE", payload);
 };
 
-const updateValue = (payload, state) => {
+const updateValue = (payload, state, stateToUpdate) => {
   state[payload.valueToUpdate] = payload.input;
   state[payload.stateToUpdate] = false; // turn off this state
   state.menu = true; // go back to menu after finished with function

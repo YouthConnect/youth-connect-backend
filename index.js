@@ -22,10 +22,10 @@ const { auth, requiresAuth } = require("express-openid-connect");
 const config = {
   authRequired: false,
   auth0Logout: true,
-  baseURL: "http://localhost:3001",
-  clientID: "jZMzUBVnwBJ3JxFfre0EaBdQvfwpaK6B",
-  issuerBaseURL: "https://dev-iaagx3vzh22w84ou.us.auth0.com",
-  secret: "LONG_RANDOM_STRING",
+  baseURL: `${process.env.baseURL}`,
+  clientID: `${process.env.clientID}`,
+  issuerBaseURL: `${process.env.issuerBaseURL}`,
+  secret: `${process.env.SECRET}`,
 };
 
 app.use(express.json());
@@ -58,6 +58,12 @@ io.on("connection", (socket) => {
   socket.on("SEND MESSAGE", (payload) => relayMessage(payload, socket));
   socket.on("BASIC INPUT", (payload) => {
     socket.emit("UPDATE VALUE", payload);
+
+    socket.on("MESSAGE", (payload) => {
+      console.log("MESSAGE:", payload);
+      socket.broadcast.emit("MESSAGE", payload);
+      //socket.to('message-room', payload)
+    });
     // socket.on('LOGIN',)
   });
 

@@ -71,6 +71,10 @@ term.on("key", (name, matches, data) => {
 
   //? Only grab these letters if the user is not in a prompt.
   if (state.menu) {
+    term("MAIN PAGE:");
+    newLine(term);
+    newLine(term);
+    newLine(term);
     //? Start a prompt command
     if (name === "p") {
       // update the state so the functions work correctly
@@ -89,6 +93,10 @@ term.on("key", (name, matches, data) => {
       state.chat = true;
       state.menu = false;
       messagePrompt(term, socket);
+    }
+
+    if (name === "m") {
+      messagePrompt(term, "currentMessage", socket);
     }
   }
 
