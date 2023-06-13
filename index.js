@@ -15,28 +15,12 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
-//? require Auth0 functions
-const { auth, requiresAuth } = require("express-openid-connect");
-
-// Create an AUTH 0 config with our ACTUAL parameters
-const config = {
-  authRequired: false,
-  auth0Logout: true,
-  baseURL: `${process.env.baseURL}`,
-  clientID: `${process.env.clientID}`,
-  issuerBaseURL: `${process.env.issuerBaseURL}`,
-  secret: `${process.env.SECRET}`,
-};
-
 app.use(express.json());
-/*
+
 //? Above the auth becausewe don't want any auth stuff here for now during testing.
-const v1 = require("./server/routes/v1");
+const v1 = require('./server/routes/v1')
 app.use("/v1", v1);
-*/
-// The `auth` router attaches /login, /logout
-// and /callback routes to the baseURL
-app.use(auth(config));
+
 
 app.get("/", (req, res) => {
   res.send(req.oidc.isAuthenticated() ? "Logged in" : "Logged out");
@@ -64,7 +48,20 @@ io.on("connection", (socket) => {
       socket.broadcast.emit("MESSAGE", payload);
       //socket.to('message-room', payload)
     });
-    // socket.on('LOGIN',)
+    socket.on('UPDATE USERNAME', payload => {
+      socket.emit("UPDATE USERNAME", payload)
+    });
+    socket.on('UPDATE PASSWORD', payload => {
+      socket.emit("UPDATE PASSWORD", payload)
+    });
+
+    socket.on("VERIFY USER", (payload) => {
+      socket.emit("GIVE ME YOUR CREDENTIALS", {})
+    })
+
+    socket.on("HERES MY CREDENTIALS", payload => {
+      authenticate(payload)
+    })
   });
 
   socket.on("MESSAGE", (payload) => {
@@ -75,9 +72,11 @@ io.on("connection", (socket) => {
   });
 });
 
-const authenticate = (user, pass) => {
-  console.log("authenticated", user, pass);
+const authenticate = (payload) => {
+  console.log("authenticated", payload.username, payload.password);
 };
+
+
 
 server.listen(PORT, () => {
   console.log("listening on *:", PORT);

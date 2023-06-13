@@ -15,6 +15,13 @@ const {
   updateValue,
 } = require("../../socketHandlers/handlerIndex");
 
+// require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
+const { terminate, introduction, newLine } = require("./lib");
+const basicInputPrompt = require("../gui/prompts/basicInputPrompts");
+const messagePrompt = require("./prompts/messagePrompt");
+const usernamePrompt = require('./prompts/usernamePrompt');
+const passwordPrompt = require('./prompts/passwordPrompt');
+
 // Socket handlers for the client
 //socket.onAny((event, payload) => receivedMessage(event, payload, socket))
 //this is not on the UML
@@ -27,17 +34,30 @@ socket.on("RESTART MESSAGE PROMPT", (payload) => {
   messagePrompt(term, socket);
 });
 
+socket.on("UPDATE USERNAME", (payload) => {
+  state.username = payload
+  passwordPrompt(term, socket)
+})
+socket.on("UPDATE PASSWORD", (payload) => {
+  state.password = payload
+  socket.emit('VERIFY USER', {})
+})
+
+socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
+  st.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
+})
+//
+
+//
+
 let basicPrompt = "";
 
-//* Proof of life message */
+//* oof of life message */
 socket.emit("SEND MESSAGE", "Hello! I am the socket client!");
 
-// require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
-const { terminate, introduction } = require("./lib");
-const basicInputPrompt = require("../gui/prompts/basicInputPrompts");
-const messagePrompt = require("./prompts/messagePrompt");
+//
 
-// create a state to represent information like what menu/action is happening right now
+// create a state to represent information like what menu/action is happening right
 const state = {
   menu: true,
   prompt: false,
@@ -96,7 +116,13 @@ term.on("key", (name, matches, data) => {
     }
 
     if (name === "m") {
-      messagePrompt(term, "currentMessage", socket);
+      messagePrompt(term, socket);
+    }
+
+    if (name === 'l') {
+      state.chat = true;
+      state.menu = false;
+      usernamePrompt(term, socket);
     }
   }
 
