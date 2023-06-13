@@ -1,5 +1,7 @@
 //* The main server index includes express app, socket hub, and auth config/secret */
 
+//TODO - fix menu state, create rooms, login logout states with messages and prompts. join room state, go back to menu state
+//TODO - Admin features/moderation/control/create rooms and manage them
 //Dot env at top just to be safe
 require("dotenv").config();
 const PORT = process.env.PORT;
@@ -66,6 +68,10 @@ io.on("connection", (socket) => {
     socket.emit("RESTART MESSAGE PROMPT", {});
   });
 });
+
+const authenticate = (user, pass) => {
+  console.log("authenticated", user, pass);
+};
 
 server.listen(PORT, () => {
   console.log("listening on *:", PORT);

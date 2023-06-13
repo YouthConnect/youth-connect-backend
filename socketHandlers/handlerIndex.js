@@ -8,11 +8,13 @@ const sendMessage = (payload, socket) => {
   socket.emit("SEND MESSAGE", payload);
 };
 
+// this ONLY prints a message, and updates its associated state.
 const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
   state[valueToUpdate] = payload.valueToUpdate;
   term.blue("\n\nmessage: ", payload.input);
 };
 
+// This ONLY tells the server i received a message. thats it.
 const receivedMessage = (payload, socket) => {
   socket.emit("RECEIVED MESSAGE", payload);
 };
