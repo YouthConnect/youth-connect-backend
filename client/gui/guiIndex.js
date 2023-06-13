@@ -31,7 +31,7 @@ socket.on("MESSAGE", (payload) => {
   receiveMessage(term, payload, state, "currentMessage", socket);
 });
 socket.on("RESTART MESSAGE PROMPT", (payload) => {
-  messagePrompt(term, socket);
+  messagePrompt(term, 'currentMessage', socket);
 });
 
 socket.on("UPDATE USERNAME", (payload) => {
@@ -44,7 +44,10 @@ socket.on("UPDATE PASSWORD", (payload) => {
 })
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
-  st.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
+  socket.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
+  introduction(term);
+  state.menu = true;
+
 })
 //
 
@@ -112,12 +115,9 @@ term.on("key", (name, matches, data) => {
     if (name === "m") {
       state.chat = true;
       state.menu = false;
-      messagePrompt(term, socket);
+      messagePrompt(term, 'currentMessage', socket);
     }
 
-    if (name === "m") {
-      messagePrompt(term, socket);
-    }
 
     if (name === 'l') {
       state.chat = true;
