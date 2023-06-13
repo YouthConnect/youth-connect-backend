@@ -31,7 +31,7 @@ app.use("*", notFoundHandler);
 app.use(errorHandler);
 
 module.exports = {
-  server: app,
+  app,
   start: (port) => {
     if (!port) {
       throw new Error("Missing Port");

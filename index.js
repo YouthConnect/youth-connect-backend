@@ -6,7 +6,7 @@
 require("dotenv").config();
 const PORT = process.env.PORT;
 
-const { server } = require('./server/server.js')
+const { app } = require('./server/server.js')
 //? Add web socket capability to express server
 const http = require("http");
 const server = http.createServer(app);
