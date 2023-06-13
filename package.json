@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon index.js",
     "start": "node index.js",
-    "start-client-dev": "nodemon ./client/index",
+    "client-dev": "nodemon ./client/gui/guiIndex.js",
     "test": "jest --verbose --coverage",
     "init:config": "sequelize init:config",
     "db:create": "sequelize db:create"

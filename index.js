@@ -23,7 +23,7 @@ const config = {
   baseURL: `${process.env.baseURL}`,
   clientID: `${process.env.clientID}`,
   issuerBaseURL: `${process.env.issuerBaseURL}`,
-  secret: `${process.env.secret}`
+  secret: `${process.env.SECRET}`
 };
 
 
@@ -57,9 +57,20 @@ const {
 io.on('connection', (socket) => {
     console.log('a user connected');
 
+    socket.onAny((event, payload) => {
+        console.log('EVENT:', event, payload)
+    })
+
     socket.on('SEND MESSAGE', payload => relayMessage(payload, socket));
     socket.on("BASIC INPUT", (payload) => {
     socket.emit("UPDATE VALUE", payload);
+
+
+  socket.on("MESSAGE", (payload) => {
+    console.log("MESSAGE:", payload);
+    socket.broadcast.emit("MESSAGE", payload);
+    //socket.to('message-room', payload)
+  });
     // socket.on('LOGIN',)
   });
 });
