@@ -20,7 +20,8 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-const { relayMessage, message, authenticate, verifyRoom } = require("./socketHandlers/handlerIndex.js");
+const { relayMessage, message, authenticate} = require("./socketHandlers/handlerIndex.js");
+const { Statement } = require("sqlite3");
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -50,10 +51,18 @@ let recentMessages = {
 
 //pass in the socket(that connected/made a request) to each of these functions
 io.on("connection", (socket) => {
-  console.log("a user connected");
 
   socket.onAny((event, payload) => {
     console.log("EVENT:", event, payload);
+  });
+
+  socket.on('GET_CONNECTED_USERS', payload => {
+    // to ALL USERS -> tell me you are here
+    socket.broadcast.emit('TELL ME YOU ARE HERE', {});
+  });
+
+  socket.on('I AM HERE', (username) => {
+    socket.to('admins').emit('IM HERE ADMINS', username);
   });
 
 /* //?------------------------------ HANDLE ROOMS ------------------------------ */
@@ -64,10 +73,25 @@ io.on("connection", (socket) => {
     socket.emit("UPDATED ROOMS", roomOptions)
   })
 
+
+
   // handle join room event
   socket.on("join", (room) => {
-    let user = verifyRoom(room, socket)
 
+    if (room === 'admins') {
+      socket.join(room)
+    } else if (roomOptions.includes(room)) {
+      // check if they have permission join
+      // axios.get(userPermsions)? to verify user can join room or the user will have a boolean that says so
+      // update the client state with the room name
+      socket.emit("UPDATE CURRENT ROOM", room);
+
+      // they join
+      socket.join(room);
+      console.log(`${socket.id} joined the ${room} room.`);
+    } else {
+      console.log(`${socket.id} tried to join an invalid room: ${room}`);
+    }
     // update the user
   });
 
@@ -110,6 +134,7 @@ io.on("connection", (socket) => {
     // let user = await axios.get('/signin', {payload.userInfo})
     // authenticate(user)
     authenticate(payload, socket);
+
   });
 
 
