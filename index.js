@@ -20,22 +20,7 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-async function removeBadWords(text) {
-  const { originalText, moderatedText } = await validateText(
-    text
-  ).removeProfaneWordsFromText();
-  // return you result as your app requires
-  //? send every bad word this person has ever written to the admin (JOKE)
-  // await axios.post('localhost/alertAdmin', ({user: user, badWords: originalText}))
-  return moderatedText;
-}
-
-// const testRouter = require("./server/server.js");
-// app.use(testRouter);
-
 const { relayMessage } = require("./socketHandlers/handlerIndex.js");
-
-// define global variables
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -57,7 +42,6 @@ let recentMessages = {
     { user: "Bob", message: "hello" },
   ],
 };
-console.log(recentMessages["Room1RecentMessages"]);
 
 //pass in the socket(that connected/made a request) to each of these functions
 io.on("connection", (socket) => {
@@ -73,38 +57,51 @@ io.on("connection", (socket) => {
     let cleanWords2 = filter2.clean(cleanWords1);
     //* Then send it to the other clients */
 
+    // push the message just submitted
+    recentMessages[`${payload.room}RecentMessages`].push({
+      text: cleanWords2,
+      username: payload.username,
+    });
+
     // create and manage a list of most recent messages //? so they can be displayed in the terminal
     let roomRecentMessages = recentMessages[`${payload.room}RecentMessages`];
-    // push the message just submitted
-    roomRecentMessages.push(cleanWords2);
+
     if (roomRecentMessages.length > 10) {
       // remove last message, do nothing with it
       let lastMessage = roomRecentMessages.pop();
     }
     socket
       .to(payload.room)
-      .emit("MESSAGE", { text: cleanWords2, username: payload.username });
+      // send the individual message sent
+      .emit("MESSAGE", { username: payload.username, text: payload.text });
 
+    socket
+      .to(payload.room)
+      // Send the newly updated recent messages and reprint it when the messages get updated
+
+      .emit(
+        "SENDING RECENT MESSAGES",
+        recentMessages[`${payload.room}RecentMessages`]
+      ); //Room1RecentMessages
+    // when server receives a message, make the client start their prompt so it continues the cycle
+    socket.emit("GO BACK TO ROOM", {});
     //* Then send it to database */
     try {
-      /*  let record = {
+      let record = {
         text: payload.text,
         room: payload.room,
         user: payload.user,
-      };*/
-      //let createdMessage1 = axios.post(`http://localhost:3001/v1/messages`, { record });
-      const createdMessage = messages.create({
-        text: payload.text,
-        room: payload.room,
-        user: payload.user,
-      });
+      };
+      let createdMessage = await axios.post(
+        `http://localhost:3001/v1/messages`,
+        {
+          record,
+        }
+      );
       console.log("This is the created message:", createdMessage);
     } catch (error) {
       console.log("Error creating collection object:", error.message);
     }
-
-    // when server receives a message, make the client start their prompt so it continues the cycle
-    socket.emit("GO BACK TO ROOM", {});
   });
 
   // handle giving the recent messages to the client
@@ -155,7 +152,7 @@ io.on("connection", (socket) => {
   });
 
   const authenticate = (user) => {
-    console.log("authenticated", payload.username, payload.password);
+    console.log("authenticated", user.username, user.password);
 
     //? return the authenticated users's info (includes their token)
     // socket.emit("UPDATE YOUR USER", user)
@@ -163,14 +160,14 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  db.sync();
+  // db.sync();
   console.log("listening on *:", PORT);
 });
 
 // export the room options so it can be used by the client
 module.exports = roomOptions;
 
-/*
+/* //? TODO
   socket.on("ADMIN VIEW ROOM", (payload) => {
     get the information about payload.room
     let info = await axios.get('/v1/rooms/roomName')

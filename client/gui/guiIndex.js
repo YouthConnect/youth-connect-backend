@@ -61,7 +61,7 @@ socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
 
 socket.on("SENDING RECENT MESSAGES", (payload) => {
   payload.forEach((message) =>
-    term.blue(`\n${message.user}: ${message.message}\n`)
+    term.blue(`\n${message.username}: ${message.text}\n`)
   );
 }); // payload = [message1, message2, ....]
 
