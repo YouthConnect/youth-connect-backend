@@ -20,7 +20,7 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-const { relayMessage, message, authenticate, verifyRoom } = require("./socketHandlers/handlerIndex.js");
+const { relayMessage, message, authenticate, verifyRoom , createRoom, getRoomOptions} = require("./socketHandlers/handlerIndex.js");
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -57,6 +57,15 @@ io.on("connection", (socket) => {
   });
 
 /* //?------------------------------ HANDLE ROOMS ------------------------------ */
+socket.on("CREATE ROOM", (payload) => {
+  //TODO - create a room in the database
+  createRoom(payload, socket)
+  //TODO - update the room options
+  let roomList=getRoomOptions()
+  //TODO - send the updated room options to the client
+
+  socket.emit("UPDATED ROOMS", roomList);
+});
 
   socket.on("GIVE ME UPDATED ROOMS", (payload) => {
     //axios get request for all of the rooms in the database

@@ -105,6 +105,26 @@ const relayMessage = (payload, socket) => {
   socket.broadcast.emit("RELAY MESSAGE", payload);
 };
 
+const createRoom = async(payload, socket) => {
+  let createdRoom = await axios.post(
+    `http://localhost:3001/api/v1/rooms`,
+    {
+      name: payload.room,
+      users: payload.users,
+      description: payload.description,
+      minimumAge: payload.minimumAge,
+      maxAge: payload.maxAge
+    }
+  );
+  socket.emit("CREATED ROOM", createdRoom);
+};
+
+const getRoomOptions = async() => {
+  let roomList = await axios.get('http://localhost:3001/api/v1/rooms')
+  return roomList
+}
+
+
 module.exports = {
   sendMessage,
   changeState,
@@ -113,4 +133,6 @@ module.exports = {
   relayMessage,
   authenticate,
   verifyRoom,
+  createRoom,
+  getRoomOptions
 };
