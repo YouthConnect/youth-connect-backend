@@ -97,6 +97,11 @@ term.on("mouse", (name, matches, data) => {
 term.on("key", (name, matches, data) => {
   //? console.log("keyboard", name, data);
 
+  //TODO LASSSTTT
+  /*if (user.isAdmin && state.isAdmin) {
+    showAdminToolColumnSelectorPrompt();
+  }*/
+
   if (name === "END" || name === "CTRL_C") {
     terminate(term);
   }

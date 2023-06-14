@@ -109,6 +109,7 @@ io.on("connection", (socket) => {
 
   // handle giving the recent messages to the client
   socket.on("GET RECENT MESSAGES", (payload) => {
+    // let messagesFromRoom = await axios.get('v1/messages/from/${payload.room}')
     // payload = "Room1"
     socket.emit(
       "SENDING RECENT MESSAGES",
@@ -130,6 +131,8 @@ io.on("connection", (socket) => {
 
   socket.on("HERES MY CREDENTIALS", (payload) => {
     //TODO transform this to use await axios.post('/signin') and handle that
+    // let user = await axios.get('/signin', {payload.userInfo})
+    // authenticate(user)
     authenticate(payload);
   });
 
@@ -151,10 +154,11 @@ io.on("connection", (socket) => {
     }
   });
 
-  const authenticate = (payload) => {
+  const authenticate = (user) => {
     console.log("authenticated", payload.username, payload.password);
 
     //? return the authenticated users's info (includes their token)
+    // socket.emit("UPDATE YOUR USER", user)
   };
 });
 
@@ -165,3 +169,10 @@ server.listen(PORT, () => {
 
 // export the room options so it can be used by the client
 module.exports = roomOptions;
+
+/*
+  socket.on("ADMIN VIEW ROOM", (payload) => {
+    get the information about payload.room
+    let info = await axios.get('/v1/rooms/roomName')
+  })
+*/
