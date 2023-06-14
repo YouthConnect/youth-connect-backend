@@ -6,30 +6,27 @@ const term = require("terminal-kit").terminal;
 const { io } = require("socket.io-client");
 const socket = io("http://localhost:3001");
 
-const roomOptions = require('../../index')
+const roomOptions = require("../../index");
 
 //? require functions from the socket client lib that contains basic handlers for our socket client
 const {
   changeState,
-  sendMessage,
   receiveMessage,
   receivedMessage,
-  updateValue,
 } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
 const { terminate, mainMenu, newLine, roomMenu } = require("./lib");
-const basicInputPrompt = require("../gui/prompts/basicInputPrompts");
 const messagePrompt = require("./prompts/messagePrompt");
-const usernamePrompt = require('./prompts/usernamePrompt');
-const passwordPrompt = require('./prompts/passwordPrompt');
-const roomPrompt = require('./prompts/roomPrompt');
+const usernamePrompt = require("./prompts/usernamePrompt");
+const passwordPrompt = require("./prompts/passwordPrompt");
+const roomPrompt = require("./prompts/roomPrompt");
 
 // Socket handlers for the client
 // socket.onAny((event, payload) => receivedMessage(event, payload, socket))
 //this is not on the UML
 socket.on("RELAY MESSAGE", (payload) => receiveMessage(term, payload, socket));
-socket.on("UPDATE VALUE", (payload) => updateValue(payload, state));
+
 socket.on("MESSAGE", (payload) => {
   receiveMessage(term, payload, state, "currentMessage", socket);
 });
@@ -39,29 +36,41 @@ socket.on("GO BACK TO ROOM", (payload) => {
 });
 
 socket.on("UPDATE USERNAME", (payload) => {
-  state.username = payload
-  passwordPrompt(term, socket)
-})
+  state.username = payload;
+  passwordPrompt(term, socket);
+});
 socket.on("UPDATE PASSWORD", (payload) => {
-  state.password = payload
-  socket.emit('VERIFY USER', {})
-})
+  state.password = payload;
+  socket.emit("VERIFY USER", {});
+});
 
-socket.on("UPDATE CURRENT ROOM",(payload) => {
+socket.on("UPDATE CURRENT ROOM", (payload) => {
   // update the current room state?
   state.selectedRoom = payload;
   state.room = true;
-  roomMenu(term, payload)
+  roomMenu(term, payload);
 });
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
-  socket.emit("HERES MY CREDENTIALS", { username: state.username, password: state.password })
+  socket.emit("HERES MY CREDENTIALS", {
+    username: state.username,
+    password: state.password,
+  });
   state.menu = true;
-})
+});
 
-//* proof of life message */
-socket.emit("SEND MESSAGE", "Hello! I am the socket client!");
+socket.on("SENDING RECENT MESSAGES", (payload) => {
+  payload.forEach((message) =>
+    term.blue(`\n${message.user}: ${message.message}\n`)
+  );
+}); // payload = [message1, message2, ....]
 
+//ask server to give us the most recent messages
+const askForRecentMessages = () => {
+  if (state.selectedRoom) {
+    socket.emit("GET RECENT MESSAGES", state.selectedRoom);
+  }
+};
 
 // create a state to represent information like what menu/action is happening right
 const state = {
@@ -70,7 +79,8 @@ const state = {
   chat: false,
   basicPrompt: "null",
   currentMessage: "null",
-  selectedRoom: null
+  selectedRoom: null,
+  username: `bobby ${Math.random()}`,
 };
 
 //? mainMenu to introduce features and concepts of the terminal-kit
@@ -100,20 +110,13 @@ term.on("key", (name, matches, data) => {
   if (state.menu) {
     mainMenu(term);
     //? Start a prompt command
-    if (name === "p") {
-      // update the state so the functions work correctly
-      state.menu = false;
-      state.prompt = true;
-      //? pass in the terminal, value to update, and socket into the function to update State and values
-      basicInputPrompt(term, "basicPrompt", socket);
-    }
 
     if (name === "v") {
       // no need to change state here
       term.blue(JSON.stringify(state));
     }
 
-    if (name === 'l') {
+    if (name === "l") {
       state.chat = true;
       state.menu = false;
       usernamePrompt(term, socket);
@@ -126,8 +129,6 @@ term.on("key", (name, matches, data) => {
       state.room = true;
       //console.log(roomOptions)
       roomPrompt(term, roomOptions, socket);
-
-
     }
   }
 
@@ -139,39 +140,35 @@ term.on("key", (name, matches, data) => {
     }
   }
 
-  //TODO- when you select room for the first time view the roomMenu
-  // ? When you press ctl+r view the rooms again
-  //* allow room state see the rooms and join a new room
-  // when we press escape in the room, take us to main menu and do //?socket.leaveRoom()
+  //?socket.leaveRoom()
 
+  //TODO get the list of most recent messages when on the room page.
+  //TODO when on the room page, update the list of messages while idle
   if (state.room) {
     // pass term to use it, and room name to print the room name
     roomMenu(term, state.selectedRoom);
-    //? Start a prompt command
-
+    //! get the messages
+    askForRecentMessages(state.selectedRoom);
     if (name === "m") {
       state.chat = true;
       state.room = false;
-      messagePrompt(term, socket);
+      messagePrompt(term, state.selectedRoom, state.username, socket);
     }
 
     //press r to view rooms function
-    if (name === "CTRL_R"){
+    if (name === "CTRL_R") {
       state.menu = true;
       state.room = false;
       roomPrompt(term, roomOptions, socket);
     }
 
-
-    // press escacpe function
+    // press escape function
     if (name === "ESCAPE") {
       mainMenu(term);
       state.menu = true;
       state.room = false;
     }
-
-}
-
+  }
 });
 
 //* Make the terminal-kit override the normal terminal and listen for input so we can custom things with it */
