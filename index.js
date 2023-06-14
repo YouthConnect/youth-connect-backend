@@ -20,7 +20,16 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-const { relayMessage, message, authenticate, verifyRoom , createRoom, getRoomOptions} = require("./socketHandlers/handlerIndex.js");
+const {
+  relayMessage,
+  message,
+  authenticate,
+  verifyRoom ,
+  createRoom,
+  getRoomOptions,
+  deleteRoom,
+  updateRoom
+} = require("./socketHandlers/handlerIndex.js");
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -70,7 +79,8 @@ socket.on("CREATE ROOM", (payload) => {
   socket.on("GIVE ME UPDATED ROOMS", (payload) => {
     //axios get request for all of the rooms in the database
     // for now send hard coded rooms
-    socket.emit("UPDATED ROOMS", roomOptions)
+    let roomList=getRoomOptions()
+    socket.emit("UPDATED ROOMS", roomList)
   })
 
   // handle join room event
@@ -78,7 +88,32 @@ socket.on("CREATE ROOM", (payload) => {
     let user = verifyRoom(room, socket)
 
     // update the user
+
   });
+  //TODO - handle leave room event
+socket.on("leave", (room) => {
+  //TODO - update the user
+
+
+
+  //TODO - handle delete room event
+  socket.on("DELETE ROOM", (payload) => {
+    //TODO - delete the room from the database
+    deleteRoom(payload, socket)
+    //TODO - update the room options
+    let roomList=getRoomOptions()
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOMS", roomList);
+  });
+
+  //TODO - handle update room event
+  socket.on("UPDATE ROOM", (payload) => {
+    //TODO - update the room in the database
+    let newRoomOptions=updateRoom(payload, socket)
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
+  });
+
 
 /* //?----------------------------- HANDLE MESSAGES ---------------------------- */
 

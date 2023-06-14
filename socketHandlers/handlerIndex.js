@@ -124,6 +124,26 @@ const getRoomOptions = async() => {
   return roomList
 }
 
+const deleteRoom = async(payload, socket) => {
+  let deletedRoom = await axios.delete(
+    `http://localhost:3001/api/v1/rooms/${payload.room}`);
+  socket.emit("DELETED ROOM", deletedRoom);
+};
+
+const updateRoom = async(payload, socket) => {
+  let updatedRoom = await axios.put(
+    `http://localhost:3001/api/v1/rooms/${payload.room}`,
+    {
+      name: payload.room,
+      users: payload.users,
+      description: payload.description,
+      minimumAge: payload.minimumAge,
+      maxAge: payload.maxAge
+    }
+  );
+  socket.emit("UPDATED ROOM", updatedRoom);
+};
+
 
 module.exports = {
   sendMessage,
@@ -134,5 +154,7 @@ module.exports = {
   authenticate,
   verifyRoom,
   createRoom,
-  getRoomOptions
+  getRoomOptions,
+  deleteRoom,
+  updateRoom
 };
