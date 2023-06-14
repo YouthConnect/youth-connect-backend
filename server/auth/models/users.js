@@ -2,6 +2,7 @@
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const {rooms} = require('../../models/index')
 
 const SECRET = process.env.SECRET || "secretstring";
 
@@ -30,15 +31,19 @@ const userModel = (sequelize, DataTypes) => {
     },
     rooms: {
       type: DataTypes.VIRTUAL,
-      get() {
+      async get() {
         // get the DOB in years to compare the age ranges
         let today = new Date();
-        let age = today.getFullYear() - this.DOB.getFullYear();
+        console.log(today.getFullYear, this.DOB, parseInt(this.DOB.split('/')));
+        let age = parseInt(today.getFullYear().split('/')[2]) - parseInt(this.DOB.split('/')[2]);
         console.log(today, age)
+        console.log(typeof rooms)
+        const allRooms = await rooms.get();
+
         // get the list of rooms, return only the rooms that fit our age range
-        let okayRooms = rooms.filter(room => room.minAge <= this.DOB && room.maxAge >= this.DOB)
+        let okayRooms = allRooms.filter(room => room.minAge <= age && room.maxAge >= age)
         return okayRooms
-      }, set(rooms) {
+      }, async set(rooms) {
         return rooms
       },
     },

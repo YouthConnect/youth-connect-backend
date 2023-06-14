@@ -71,6 +71,32 @@ socket.on("SENDING RECENT MESSAGES", (payload) => {
   }
 }); // payload = [message1, message2, ....]
 
+socket.on('TELL ME YOU ARE HERE', (payload) => {
+
+  socket.emit('I AM HERE', state.username);
+});
+
+socket.on('IM HERE ADMINS', (payload) => {
+
+  term.green(payload);
+});
+
+socket.on("UPDATE YOUR USER", payload => {
+  if (payload === "admin") {
+    console.log('joining admins')
+    socket.emit('join', 'admins')
+  }
+})
+
+//ask server for all users connected
+
+const askForConnectedUsers = () => {
+  if (state.username === 'admin') {
+    // ask everyone to report back to me they are here
+    socket.emit('GET_CONNECTED_USERS', {})
+  }
+}
+
 //ask server to give us the most recent messages
 const askForRecentMessages = () => {
   if (state.selectedRoom) {
@@ -91,7 +117,7 @@ const state = {
   currentMessage: "null",
   selectedRoom: null,
   username: `bobby ${Math.random()}`,
-  isAdmin: false, ///////
+  isAdmin: false,
 };
 
 //*do requests that need to be done async before users interact with terminal!
@@ -142,6 +168,7 @@ term.on("key", (name, matches, data) => {
     if (name === "v") {
       // no need to change state here
       term.blue(JSON.stringify(state));
+      askForConnectedUsers();
     }
 
     if (name === "ESCAPE") {
@@ -158,8 +185,8 @@ term.on("key", (name, matches, data) => {
     }
 
     if (name === "o") {
-      state.adminRoomsMenu = true;
-      state.room = false;
+      state.adminRoomsMenu = false;
+      state.room = true;
       roomPrompt(term, state.roomOptions, socket); //potentially change to just view room?
     }
 
