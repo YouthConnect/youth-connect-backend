@@ -14,7 +14,7 @@ const userModel = (sequelize, DataTypes) => {
       required: true,
       defaultValue: "user",
     },
-    DOB: { type: DataTypes.DATE, required: true }, // '03/06/2010'
+    DOB: { type: DataTypes.DATEONLY, required: true }, // '03/06/2010'
     token: {
       type: DataTypes.VIRTUAL,
       get() {
@@ -34,6 +34,7 @@ const userModel = (sequelize, DataTypes) => {
         // get the DOB in years to compare the age ranges
         let today = new Date();
         let age = today.getFullYear() - this.DOB.getFullYear();
+        console.log(today, age)
         // get the list of rooms, return only the rooms that fit our age range
         let okayRooms = rooms.filter(room => room.minAge <= this.DOB && room.maxAge >= this.DOB)
         return okayRooms

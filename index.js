@@ -20,7 +20,7 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-const { relayMessage } = require("./socketHandlers/handlerIndex.js");
+const { relayMessage, message, authenticate, verifyRoom } = require("./socketHandlers/handlerIndex.js");
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -28,6 +28,7 @@ let roomOptions = ["Room1", "Room2", "Room3"];
 // TODO When the server starts create the rooms from the database
 
 // await axios.get(/rooms/room1/last10)
+//create a feed of only the most recent messages from the database in real time
 let recentMessages = {
   Room1RecentMessages: [
     { username: "John", text: "hello" },
@@ -55,65 +56,27 @@ io.on("connection", (socket) => {
     console.log("EVENT:", event, payload);
   });
 
+/* //?------------------------------ HANDLE ROOMS ------------------------------ */
+
   socket.on("GIVE ME UPDATED ROOMS", (payload) => {
     //axios get request for all of the rooms in the database
     // for now send hard coded rooms
     socket.emit("UPDATED ROOMS", roomOptions)
   })
 
+  // handle join room event
+  socket.on("join", (room) => {
+    let user = verifyRoom(room, socket)
+
+    // update the user
+  });
+
+/* //?----------------------------- HANDLE MESSAGES ---------------------------- */
+
   socket.on("MESSAGE", async (payload) => {
-    // use the middleware
+    // use the 'middleware'
+    await message(payload, socket, recentMessages)
 
-    if (payload.text !== '') {
-      try {
-        const currentRoomMessages = `${payload.room}RecentMessages`
-
-        let cleanWords1 = filter1.clean(payload.text);
-        let cleanWords2 = filter2.clean(cleanWords1);
-
-
-        //* Then send it to the other clients */
-
-        // push the message just submitted
-        recentMessages[currentRoomMessages].push({
-          text: cleanWords2,
-          username: payload.username,
-        });
-
-        // create and manage a list of most recent messages //? so they can be displayed in the terminal
-
-        if (recentMessages[currentRoomMessages].length > 10) {
-          // remove last message, do nothing with it
-          let lastMessage = recentMessages[currentRoomMessages].shift();
-          console.log('removed message from last 10:', lastMessage)
-        }
-
-        socket
-          .to(payload.room)
-          // Send the newly updated recent messages and reprint it when the messages get updated
-
-          .emit(
-            "SENDING RECENT MESSAGES",
-            recentMessages[currentRoomMessages]
-          ); //Room1RecentMessages
-
-        //* Then send it to database */
-        let createdMessage = await axios.post(
-          `http://localhost:3001/api/v1/messages`,
-          {
-            text: cleanWords2,
-            room: payload.room,
-            username: payload.username,
-          }
-        );
-
-        console.log("This is the created message:", createdMessage.data.text);
-      } catch (error) {
-        console.log("Error creating collection object:", error.message);
-      }
-
-
-    }
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("GO BACK TO ROOM", {});
   });
@@ -127,6 +90,8 @@ io.on("connection", (socket) => {
       recentMessages[`${payload}RecentMessages`]
     ); //Room1RecentMessages
   });
+
+/* //?------------------------------- USER LOGIN ------------------------------- */
 
   socket.on("UPDATE USERNAME", (payload) => {
     socket.emit("UPDATE USERNAME", payload);
@@ -144,34 +109,15 @@ io.on("connection", (socket) => {
     //TODO transform this to use await axios.post('/signin') and handle that
     // let user = await axios.get('/signin', {payload.userInfo})
     // authenticate(user)
-    authenticate(payload);
+    authenticate(payload, socket);
   });
 
-  // handle join room event
-  socket.on("join", (room) => {
-    // Verify the room exists
-    // let roomOptions = await axios.get('localhost/rooms')
-    if (roomOptions.includes(room)) {
-      // check if they have permission join
-      //? axios.get(userPermsions)? to verify user can join room or the user will have a boolean that says so
-      // update the client state with the room name
-      socket.emit("UPDATE CURRENT ROOM", room);
 
-      // they join
-      socket.join(room);
-      console.log(`${socket.id} joined the ${room} room.`);
-    } else {
-      console.log(`${socket.id} tried to join an invalid room: ${room}`);
-    }
-  });
 
-  const authenticate = (user) => {
-    console.log("authenticated", user.username, user.password);
 
-    //? return the authenticated users's info (includes their token)
-    // socket.emit("UPDATE YOUR USER", user)
-  };
 });
+
+//* Sync the database and start the server */
 
 db.sync().then(() => {
   server.listen(PORT, () => {
