@@ -14,7 +14,14 @@ const {
 } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
-const { terminate, mainMenu, newLine, roomMenu, adminMenu, adminRoomsMenu } = require("./lib");
+const {
+  terminate,
+  mainMenu,
+  newLine,
+  roomMenu,
+  adminMenu,
+  adminRoomsMenu,
+} = require("./lib");
 const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
@@ -31,7 +38,7 @@ socket.on("MESSAGE", (payload) => {
 
 socket.on("UPDATED ROOMS", (payload) => {
   state.roomOptions = payload;
-})
+});
 
 socket.on("GO BACK TO ROOM", (payload) => {
   state.room = true;
@@ -71,31 +78,30 @@ socket.on("SENDING RECENT MESSAGES", (payload) => {
   }
 }); // payload = [message1, message2, ....]
 
-socket.on('TELL ME YOU ARE HERE', (payload) => {
-
-  socket.emit('I AM HERE', state.username);
+socket.on("TELL ME YOU ARE HERE", (payload) => {
+  socket.emit("I AM HERE", state.username);
 });
 
-socket.on('IM HERE ADMINS', (payload) => {
-
+socket.on("IM HERE ADMINS", (payload) => {
   term.green(payload);
 });
 
-socket.on("UPDATE YOUR USER", payload => {
+socket.on("UPDATE YOUR USER", (payload) => {
   if (payload === "admin") {
-    console.log('joining admins')
-    socket.emit('join', 'admins')
+    console.log("joining admins");
+    socket.emit("join", "admins");
   }
-})
+  state.userId = payload.id;
+});
 
 //ask server for all users connected
 
 const askForConnectedUsers = () => {
-  if (state.username === 'admin') {
+  if (state.username === "admin") {
     // ask everyone to report back to me they are here
-    socket.emit('GET_CONNECTED_USERS', {})
+    socket.emit("GET_CONNECTED_USERS", {});
   }
-}
+};
 
 //ask server to give us the most recent messages
 const askForRecentMessages = () => {
@@ -105,8 +111,8 @@ const askForRecentMessages = () => {
 };
 
 askForUpdatedRooms = () => {
-  socket.emit("GIVE ME UPDATED ROOMS", {})
-}
+  socket.emit("GIVE ME UPDATED ROOMS", {});
+};
 
 // create a state to represent information like what menu/action is happening right
 const state = {
@@ -151,14 +157,12 @@ term.on("key", (name, matches, data) => {
     changeState(state, socket);
   }
 
-
   /*//? ------------------------------- ADMIN MENUS ------------------------------ */
 
   if (state.adminMenu) {
     adminMenu(term);
     // do admin specific commands here
     if (name === "r") {
-
       state.adminMenu = false;
       state.adminRoomsMenu = true;
       adminRoomsMenu(term);
@@ -177,37 +181,29 @@ term.on("key", (name, matches, data) => {
       state.menu = true;
     }
 
-
     if (state.adminRoomsMenu) {
       // if they are in admin room menu
       adminRoomsMenu(term);
-
     }
 
     if (name === "o") {
       state.adminRoomsMenu = false;
       state.room = true;
-      roomPrompt(term, state.roomOptions, socket); //potentially change to just view room?
+      roomPrompt(term, state.roomOptions, state.userId, socket); //potentially change to just view room?
     }
-
-
   }
-
-
 
   /*//? ------------------------------- NORMAL MENUS ------------------------------ */
   // Only grab these letters if the user is not in a prompt.
   if (state.menu) {
     mainMenu(term);
 
-    if (state.username === 'admin') {
-
-      if (name === 'a') {
+    if (state.username === "admin") {
+      if (name === "a") {
         // if the admin is logged in, and then they press the 'secret key' then show the admin menu
-        state.adminMenu = true
+        state.adminMenu = true;
         state.menu = false;
       }
-
     }
 
     if (name === "l") {
@@ -232,7 +228,6 @@ term.on("key", (name, matches, data) => {
       state.chat = false;
       state.room = true;
     }
-
   }
 
   //?socket.leaveRoom()
@@ -264,9 +259,7 @@ term.on("key", (name, matches, data) => {
       state.menu = true;
       state.room = false;
     }
-
   }
-
 });
 
 //* Make the terminal-kit override the normal terminal and listen for input so we can custom things with it */
