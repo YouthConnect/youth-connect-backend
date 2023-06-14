@@ -28,7 +28,9 @@ const {
   createRoom,
   getRoomOptions,
   deleteRoom,
-  updateRoom
+  updateRoom,
+  getRoomUsers,
+  deleteUserInRoom,
 } = require("./socketHandlers/handlerIndex.js");
 
 //?Update this later let roomOptions = await database.get("rooms")
@@ -90,9 +92,9 @@ socket.on("CREATE ROOM", (payload) => {
     // update the user
 
   });
-  //TODO - handle leave room event
-socket.on("leave", (room) => {
-  //TODO - update the user
+
+
+
 
 
 
@@ -113,6 +115,19 @@ socket.on("leave", (room) => {
     //TODO - send the updated room options to the client
     socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
   });
+
+    //TODO - handle leave room event
+socket.on("leave", (payload) => {
+  //TODO - update the users in the room
+  let getUsersInRoom= getRoomUsers(payload, socket)
+  let updatedUsers=deleteUserInRoom(getUsersInRoom, payload.user)
+  let newPayload={room:payload.room, users:updatedUsers}
+    //TODO - update the room options
+  updateRoom(newPayload, socket)
+
+  //TODO - send the updated room options to the client
+  socket.emit("LEFT ROOM ", payload.user);
+});
 
 
 /* //?----------------------------- HANDLE MESSAGES ---------------------------- */
