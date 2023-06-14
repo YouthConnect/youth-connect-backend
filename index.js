@@ -160,7 +160,7 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  // db.sync();
+  db.sync();
   console.log("listening on *:", PORT);
 });
 

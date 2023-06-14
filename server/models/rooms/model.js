@@ -5,7 +5,7 @@ const roomModel = (sequelize, DataTypes) =>
     name: { type: DataTypes.STRING, required: true },
     users: {
       type: DataTypes.ARRAY(DataTypes.STRING),
-      defaultValue: ["default"],
+      defaultValue: [],
     }, // allow admins to edit people in a room.
     description: { type: DataTypes.STRING, required: true },
   });
