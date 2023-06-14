@@ -16,7 +16,7 @@ const messagePrompt = async (term, room, username, socket) => {
 
       if (input === undefined) {
       } else {
-        term.green("\nYour message is '%s'\n", input);
+        //term.green("\nYour message is '%s'\n", input);
         //update state through socket client because is doesn't work through other methods
         //TODO Send the room and the user along with the chat message
         //? MAKE payload = {  text: input, room: "room1", user: username}
@@ -26,6 +26,7 @@ const messagePrompt = async (term, room, username, socket) => {
           username: username,
         };
         socket.emit("MESSAGE", payload);
+        return
       }
     }
   ).promise; //? Create this input as a promise so it can be awaited and returned

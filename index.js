@@ -14,7 +14,7 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const axios = require("axios");
-const { rooms, messages, userModule, db } = require("./server/models/index.js");
+const { db } = require("./server/models/index.js");
 
 var Filter = require("bad-words");
 const filter1 = new Filter();
@@ -30,16 +30,16 @@ let roomOptions = ["Room1", "Room2", "Room3"];
 // await axios.get(/rooms/room1/last10)
 let recentMessages = {
   Room1RecentMessages: [
-    { user: "John", message: "hello" },
-    { user: "Bob", message: "hello" },
+    { username: "John", text: "hello" },
+    { username: "Bob", text: "hello" },
   ],
   Room2RecentMessages: [
-    { user: "John", message: "hello" },
-    { user: "Bob", message: "hello" },
+    { username: "John", text: "hello" },
+    { username: "Bob", text: "hello" },
   ],
   Room3RecentMessages: [
-    { user: "John", message: "hello" },
-    { user: "Bob", message: "hello" },
+    { username: "John", text: "hello" },
+    { username: "Bob", text: "hello" },
   ],
 };
 
@@ -51,57 +51,73 @@ io.on("connection", (socket) => {
     console.log("EVENT:", event, payload);
   });
 
+  socket.on("GIVE ME UPDATED ROOMS", (payload) => {
+    //axios get request for all of the rooms in the database
+    // for now send hard coded rooms
+    socket.emit("UPDATED ROOMS", roomOptions)
+  })
+
   socket.on("MESSAGE", async (payload) => {
     // use the middleware
-    let cleanWords1 = filter1.clean(payload.text);
-    let cleanWords2 = filter2.clean(cleanWords1);
-    //* Then send it to the other clients */
 
-    // push the message just submitted
-    recentMessages[`${payload.room}RecentMessages`].push({
-      text: cleanWords2,
-      username: payload.username,
-    });
+    if (payload.text !== '') {
+      try {
 
-    // create and manage a list of most recent messages //? so they can be displayed in the terminal
-    let roomRecentMessages = recentMessages[`${payload.room}RecentMessages`];
+        let cleanWords1 = filter1.clean(payload.text);
+        let cleanWords2 = filter2.clean(cleanWords1);
 
-    if (roomRecentMessages.length > 10) {
-      // remove last message, do nothing with it
-      let lastMessage = roomRecentMessages.pop();
+
+        //* Then send it to the other clients */
+
+        // push the message just submitted
+        recentMessages[`${payload.room}RecentMessages`].push({
+          text: cleanWords2,
+          username: payload.username,
+        });
+
+        // create and manage a list of most recent messages //? so they can be displayed in the terminal
+        let roomRecentMessages = recentMessages[`${payload.room}RecentMessages`];
+
+        if (roomRecentMessages.length > 10) {
+          // remove last message, do nothing with it
+          let lastMessage = recentMessages[`${payload.room}RecentMessages`].pop();
+        }
+        /* socket
+           .to(payload.room)
+           // send the individual message sent
+           .emit("MESSAGE", {});
+        */
+
+        socket
+          .to(payload.room)
+          // Send the newly updated recent messages and reprint it when the messages get updated
+
+          .emit(
+            "SENDING RECENT MESSAGES",
+            recentMessages[`${payload.room}RecentMessages`]
+          ); //Room1RecentMessages
+
+        //* Then send it to database */
+
+
+        let createdMessage = await axios.post(
+          `http://localhost:3001/api/v1/messages`,
+          {
+            text: cleanWords2,
+            room: payload.room,
+            username: payload.username,
+          }
+        );
+
+        console.log("This is the created message:", createdMessage.data.text);
+      } catch (error) {
+        console.log("Error creating collection object:", error.message);
+      }
+
+
     }
-    socket
-      .to(payload.room)
-      // send the individual message sent
-      .emit("MESSAGE", { username: payload.username, text: payload.text });
-
-    socket
-      .to(payload.room)
-      // Send the newly updated recent messages and reprint it when the messages get updated
-
-      .emit(
-        "SENDING RECENT MESSAGES",
-        recentMessages[`${payload.room}RecentMessages`]
-      ); //Room1RecentMessages
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("GO BACK TO ROOM", {});
-    //* Then send it to database */
-    try {
-      let record = {
-        text: payload.text,
-        room: payload.room,
-        user: payload.user,
-      };
-      let createdMessage = await axios.post(
-        `http://localhost:3001/v1/messages`,
-        {
-          record,
-        }
-      );
-      console.log("This is the created message:", createdMessage);
-    } catch (error) {
-      console.log("Error creating collection object:", error.message);
-    }
   });
 
   // handle giving the recent messages to the client
@@ -159,13 +175,12 @@ io.on("connection", (socket) => {
   };
 });
 
-server.listen(PORT, () => {
-  db.sync();
-  console.log("listening on *:", PORT);
+db.sync().then(() => {
+  server.listen(PORT, () => {
+    console.log("listening on *:", PORT);
+  });
 });
 
-// export the room options so it can be used by the client
-module.exports = roomOptions;
 
 /* //? TODO
   socket.on("ADMIN VIEW ROOM", (payload) => {
