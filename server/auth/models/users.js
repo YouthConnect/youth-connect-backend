@@ -10,11 +10,11 @@ const userModel = (sequelize, DataTypes) => {
     username: { type: DataTypes.STRING, required: true, unique: true },
     password: { type: DataTypes.STRING, required: true },
     role: {
-      type: DataTypes.ENUM("user", "writer", "editor", "admin"),
+      type: DataTypes.ENUM("user", "admin"),
       required: true,
       defaultValue: "user",
     },
-    DOB: { type: DataTypes.DATEONLY, required: true }, // '03/06/2010'
+    DOB: { type: DataTypes.DATE, required: true }, // '03/06/2010'
     token: {
       type: DataTypes.VIRTUAL,
       get() {
@@ -28,14 +28,29 @@ const userModel = (sequelize, DataTypes) => {
         return token;
       },
     },
+    rooms: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        // get the DOB in years to compare the age ranges
+        let today = new Date();
+        let age = today.getFullYear() - this.DOB.getFullYear();
+        // get the list of rooms, return only the rooms that fit our age range
+        let okayRooms = rooms.filter(room => room.minAge <= this.DOB && room.maxAge >= this.DOB)
+        return okayRooms
+      }, set(rooms) {
+        return rooms
+      },
+    },
+    approved: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
     capabilities: {
       type: DataTypes.VIRTUAL,
       get() {
         const acl = {
-          user: ["read"],
-          writer: ["read", "create"],
-          editor: ["read", "create", "update"],
-          admin: ["read", "create", "update", "delete"],
+          user: ["read", "message"],
+          admin: ["read", "message", "create", "update", "delete"],
         };
         return acl[this.role];
       },

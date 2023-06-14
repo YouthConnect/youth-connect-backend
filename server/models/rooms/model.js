@@ -8,6 +8,8 @@ const roomModel = (sequelize, DataTypes) =>
       defaultValue: null,
     }, // allow admins to edit people in a room.
     description: { type: DataTypes.STRING, required: true },
+    minimumAge:{ type: DataTypes.INTEGER, required: true },
+    maxAge: { type: DataTypes.INTEGER, required: true }
   });
 
 module.exports = roomModel;

@@ -130,26 +130,9 @@ term.on("key", (name, matches, data) => {
     mainMenu(term);
 
     if (state.username === 'admin') {
-
-      if (name === 'a') {
-        // if the admin is logged in, and then they press the 'secret key' then show the admin menu
-        state.adminMenu = true
-        state.menu = false;
-      }
+      adminMenu(term);
 
       if (state.adminMenu) {
-        adminMenu(term);
-        // do admin specific commands here
-        if ('') {
-
-        }
-
-        if (name === "ESCAPE") {
-          mainMenu(term);
-          state.adminMenu = false;
-          state.menu = true;
-        }
-
 
       }
     }
@@ -183,7 +166,7 @@ term.on("key", (name, matches, data) => {
       state.room = true;
     }
 
-    if (state.isAdmin) {
+    if(state.isAdmin) {
       adminMenu(term);
     }
   }
@@ -219,7 +202,7 @@ term.on("key", (name, matches, data) => {
       state.menu = true;
       state.room = false;
     }
-
+    
   }
 
 });

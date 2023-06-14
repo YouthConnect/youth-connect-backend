@@ -80,6 +80,79 @@ const roomMenu = (term, selectedRoom) => {
   newLine(term);
 };
 
+// create admin menu
+
+const adminMenu = (term) => {
+
+  newLine(term);
+  newLine(term);
+  term.magenta("WELCOME TO YOUTH CONNECT");
+  newLine(term);
+  term.brightRed('LOGGED IN AS ADMIN');
+  newLine(term);
+  // term.blue('Please press "l" to login');
+  // newLine(term);
+  // term.blue('Please press "p" to enter a prompt');
+  // newLine(term);
+  term.blue('Please press "c" to create rooms');
+  newLine(term);
+  term.blue('Please press "r" to see a list of rooms');
+  newLine(term);
+  term.blue('Please press "u" to see all users connected');
+  newLine(term);
+  term.blue('Please press "d" to delete rooms');
+  newLine(term);
+  term.blue("Please press ESCAPE to return to main menu");
+  newLine(term);
+  term.red("in order to close this terminal, CTRL+C or END");
+  newLine(term.green);
+  newLine(term.red.bold.bgGreen);
+  newLine(term, false);
+  newLine(term, false); // easily decide whether or not to include that dash
+  term(":");
+}
+
+const adminRoomsMenu = (term) => {
+
+  clearScreen(term);
+
+  newLine(term);
+  newLine(term);
+  term.magenta("Room Controls");
+  newLine(term);
+  term.brightRed('LOGGED IN AS ADMIN');
+  newLine(term);
+  // term.blue('Please press "l" to login');
+  // newLine(term);
+  // term.blue('Please press "p" to enter a prompt');
+  // newLine(term);
+  term.blue('Please press "c" to create rooms');
+  newLine(term);
+  term.blue('Please press "r" to see a list of rooms');
+  newLine(term);
+  term.blue('Please press "u" update rooms');
+  newLine(term);
+  term.blue('Please press "d" to delete rooms');
+  newLine(term);
+  term.blue('Please press "v" to view a room by name'); //logs all the users connected
+  newLine(term);
+  term.blue('Please press "t" to see a list of rooms');
+  newLine(term);
+  term.blue('Please press "u" update rooms');
+  newLine(term);
+  term.blue('Please press "d" to delete rooms');
+  term.blue("Please press ESCAPE to return to main menu");
+  newLine(term);
+  term.red("in order to close this terminal, CTRL+C or END");
+  newLine(term.green);
+  newLine(term.red.bold.bgGreen);
+  newLine(term, false);
+  newLine(term, false); // easily decide whether or not to include that dash
+  term(":");
+}
+
+
+
 module.exports = {
   terminate,
   clearWithLines,
@@ -87,4 +160,5 @@ module.exports = {
   newLine,
   mainMenu,
   roomMenu,
+  adminMenu,
 };

@@ -32,6 +32,10 @@ let recentMessages = {
   Room1RecentMessages: [
     { username: "John", text: "hello" },
     { username: "Bob", text: "hello" },
+    { username: "John", text: "how are you?" },
+    { username: "Bob", text: "good, you?" },
+    { username: "John", text: "im good" },
+    { username: "Bob", text: "great!" },
   ],
   Room2RecentMessages: [
     { username: "John", text: "hello" },
@@ -62,6 +66,7 @@ io.on("connection", (socket) => {
 
     if (payload.text !== '') {
       try {
+        const currentRoomMessages = `${payload.room}RecentMessages`
 
         let cleanWords1 = filter1.clean(payload.text);
         let cleanWords2 = filter2.clean(cleanWords1);
@@ -70,23 +75,18 @@ io.on("connection", (socket) => {
         //* Then send it to the other clients */
 
         // push the message just submitted
-        recentMessages[`${payload.room}RecentMessages`].push({
+        recentMessages[currentRoomMessages].push({
           text: cleanWords2,
           username: payload.username,
         });
 
         // create and manage a list of most recent messages //? so they can be displayed in the terminal
-        let roomRecentMessages = recentMessages[`${payload.room}RecentMessages`];
 
-        if (roomRecentMessages.length > 10) {
+        if (recentMessages[currentRoomMessages].length > 10) {
           // remove last message, do nothing with it
-          let lastMessage = recentMessages[`${payload.room}RecentMessages`].pop();
+          let lastMessage = recentMessages[currentRoomMessages].shift();
+          console.log('removed message from last 10:', lastMessage)
         }
-        /* socket
-           .to(payload.room)
-           // send the individual message sent
-           .emit("MESSAGE", {});
-        */
 
         socket
           .to(payload.room)
@@ -94,12 +94,10 @@ io.on("connection", (socket) => {
 
           .emit(
             "SENDING RECENT MESSAGES",
-            recentMessages[`${payload.room}RecentMessages`]
+            recentMessages[currentRoomMessages]
           ); //Room1RecentMessages
 
         //* Then send it to database */
-
-
         let createdMessage = await axios.post(
           `http://localhost:3001/api/v1/messages`,
           {
