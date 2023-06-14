@@ -85,7 +85,7 @@ socket.on("CREATE ROOM", (payload) => {
     socket.emit("UPDATED ROOMS", roomList)
   })
 
-  // handle join room event
+  // TODO handle join room event
   socket.on("join", (room) => {
     let user = verifyRoom(room, socket)
 
@@ -93,8 +93,17 @@ socket.on("CREATE ROOM", (payload) => {
 
   });
 
-
-
+  // TODO add a user to a room
+  socket.on("ADD USER TO ROOM", (payload) => {
+    //TODO - update the users in the room
+    let getUsersInRoom= getRoomUsers(payload, socket)
+    let updatedUsers=getUsersInRoom.push(payload.user)
+    let newPayload={room:payload.room, users:updatedUsers}
+    //TODO - update the room options
+    let newRoomOptions=updateRoom(newPayload, socket)
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
+  });
 
 
 
@@ -117,7 +126,7 @@ socket.on("CREATE ROOM", (payload) => {
   });
 
     //TODO - handle leave room event
-socket.on("leave", (payload) => {
+socket.on("LEAVE ROOM", (payload) => {
   //TODO - update the users in the room
   let getUsersInRoom= getRoomUsers(payload, socket)
   let updatedUsers=deleteUserInRoom(getUsersInRoom, payload.user)
