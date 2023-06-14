@@ -218,7 +218,7 @@ term.on("key", (name, matches, data) => {
       state.menu = false;
       state.room = true;
       //console.log(state.roomOptions)
-      roomPrompt(term, state.roomOptions, socket);
+      roomPrompt(term, state.roomOptions, state.userId, socket);
     }
   }
 
@@ -250,7 +250,7 @@ term.on("key", (name, matches, data) => {
     if (name === "CTRL_R") {
       state.menu = true;
       state.room = false;
-      roomPrompt(term, state.roomOptions, socket);
+      roomPrompt(term, state.roomOptions, state.userId, socket);
     }
 
     // press escape function

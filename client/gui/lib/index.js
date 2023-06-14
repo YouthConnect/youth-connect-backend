@@ -83,12 +83,11 @@ const roomMenu = (term, selectedRoom) => {
 // create admin menu
 
 const adminMenu = (term) => {
-
   newLine(term);
   newLine(term);
   term.magenta("WELCOME TO YOUTH CONNECT");
   newLine(term);
-  term.brightRed('LOGGED IN AS ADMIN');
+  term.brightRed("LOGGED IN AS ADMIN");
   newLine(term);
   term.blue('Please press "r" to view room controls');
   newLine(term);
@@ -102,17 +101,16 @@ const adminMenu = (term) => {
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
-}
+};
 
 const adminRoomsMenu = (term) => {
-
   clearScreen(term);
 
   newLine(term);
   newLine(term);
   term.magenta("Room Controls");
   newLine(term);
-  term.brightRed('LOGGED IN AS ADMIN');
+  term.brightRed("LOGGED IN AS ADMIN");
   newLine(term);
   term.blue('Please press "c" to create rooms');
   newLine(term);
@@ -132,9 +130,37 @@ const adminRoomsMenu = (term) => {
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
-}
+};
 
+//TODO -------------- FINISH ME -----------------
+const adminUsersMenu = (term) => {
+  clearScreen(term);
 
+  newLine(term);
+  newLine(term);
+  term.magenta("Room Controls");
+  newLine(term);
+  term.brightRed("LOGGED IN AS ADMIN");
+  newLine(term);
+  term.blue('Please press "c" to create users');
+  newLine(term);
+  term.blue('Please press "o" to see a list of rooms');
+  newLine(term);
+  term.blue('Please press "u" to update rooms');
+  newLine(term);
+  term.blue('Please press "d" to delete rooms');
+  newLine(term);
+  term.blue('Please press "v" to view a room by name'); //logs all the users connected
+  newLine(term);
+  term.blue("Please press ESCAPE to return to main menu");
+  newLine(term);
+  term.red("in order to close this terminal, CTRL+C or END");
+  newLine(term.green);
+  newLine(term.red.bold.bgGreen);
+  newLine(term, false);
+  newLine(term, false); // easily decide whether or not to include that dash
+  term(":");
+};
 
 module.exports = {
   terminate,

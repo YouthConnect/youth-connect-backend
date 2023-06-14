@@ -34,37 +34,6 @@ const userModel = (sequelize, DataTypes) => {
         return token;
       },
     },
-    rooms: {
-      type: DataTypes.VIRTUAL,
-      async get() {
-        // get the DOB in years to compare the age ranges
-        /*  let today = new Date();
-        console.log(
-          today.getFullYear(),
-          this.DOB,
-          parseInt(this.DOB.split("/"))
-        );
-        let age = today.getFullYear() - parseInt(this.DOB.split("/")[2]);
-        console.log(today, age);
-       */
-        // console.log(roomModuleGOOD);
-        //  console.log(typeof roomModuleGOOD);
-        //  const allllllRooms = await axios.get(
-        //   "http://localhost:3001/api/v1/rooms"
-        //);
-        //console.log(allllllRooms);
-        // const allRooms = await roomModuleGOOD.get(1);
-        //console.log(allRooms);
-        // get the list of rooms, return only the rooms that fit our age range
-        /* let okayRooms = allRooms.filter(
-          (room) => room.minAge <= age && room.maxAge >= age
-        );*/
-        // return allllllRooms;
-      },
-      async set(rooms) {
-        return rooms;
-      },
-    },
     approved: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
