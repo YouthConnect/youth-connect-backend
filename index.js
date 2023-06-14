@@ -20,8 +20,22 @@ var Filter = require("bad-words");
 const filter1 = new Filter();
 var filter2 = require("leo-profanity");
 
-const { relayMessage, message, authenticate} = require("./socketHandlers/handlerIndex.js");
+
+const {
+  relayMessage,
+  message,
+  authenticate,
+  verifyRoom ,
+  createRoom,
+  getRoomOptions,
+  deleteRoom,
+  updateRoom,
+  getRoomUsers,
+  deleteUserInRoom,
+} = require("./socketHandlers/handlerIndex.js");
+
 const { Statement } = require("sqlite3");
+
 
 //?Update this later let roomOptions = await database.get("rooms")
 let roomOptions = ["Room1", "Room2", "Room3"];
@@ -66,16 +80,26 @@ io.on("connection", (socket) => {
   });
 
 /* //?------------------------------ HANDLE ROOMS ------------------------------ */
+socket.on("CREATE ROOM", (payload) => {
+  //TODO - create a room in the database
+  createRoom(payload, socket)
+  //TODO - update the room options
+  let roomList=getRoomOptions()
+  //TODO - send the updated room options to the client
+
+  socket.emit("UPDATED ROOMS", roomList);
+});
 
   socket.on("GIVE ME UPDATED ROOMS", (payload) => {
     //axios get request for all of the rooms in the database
     // for now send hard coded rooms
-    socket.emit("UPDATED ROOMS", roomOptions)
+    let roomList=getRoomOptions()
+    socket.emit("UPDATED ROOMS", roomList)
   })
 
 
+  // TODO handle join room event
 
-  // handle join room event
   socket.on("join", (room) => {
 
     if (room === 'admins') {
@@ -93,7 +117,54 @@ io.on("connection", (socket) => {
       console.log(`${socket.id} tried to join an invalid room: ${room}`);
     }
     // update the user
+
   });
+
+  // TODO add a user to a room
+  socket.on("ADD USER TO ROOM", (payload) => {
+    //TODO - update the users in the room
+    let getUsersInRoom= getRoomUsers(payload, socket)
+    let updatedUsers=getUsersInRoom.push(payload.user)
+    let newPayload={room:payload.room, users:updatedUsers}
+    //TODO - update the room options
+    let newRoomOptions=updateRoom(newPayload, socket)
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
+  });
+
+
+
+  //TODO - handle delete room event
+  socket.on("DELETE ROOM", (payload) => {
+    //TODO - delete the room from the database
+    deleteRoom(payload, socket)
+    //TODO - update the room options
+    let roomList=getRoomOptions()
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOMS", roomList);
+  });
+
+  //TODO - handle update room event
+  socket.on("UPDATE ROOM", (payload) => {
+    //TODO - update the room in the database
+    let newRoomOptions=updateRoom(payload, socket)
+    //TODO - send the updated room options to the client
+    socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
+  });
+
+    //TODO - handle leave room event
+socket.on("LEAVE ROOM", (payload) => {
+  //TODO - update the users in the room
+  let getUsersInRoom= getRoomUsers(payload, socket)
+  let updatedUsers=deleteUserInRoom(getUsersInRoom, payload.user)
+  let newPayload={room:payload.room, users:updatedUsers}
+    //TODO - update the room options
+  updateRoom(newPayload, socket)
+
+  //TODO - send the updated room options to the client
+  socket.emit("LEFT ROOM ", payload.user);
+});
+
 
 /* //?----------------------------- HANDLE MESSAGES ---------------------------- */
 

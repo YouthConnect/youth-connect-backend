@@ -88,6 +88,60 @@ const relayMessage = (payload, socket) => {
   socket.broadcast.emit("RELAY MESSAGE", payload);
 };
 
+const createRoom = async(payload, socket) => {
+  let createdRoom = await axios.post(
+    `http://localhost:3001/api/v2/rooms`,
+    {
+      name: payload.room,
+      users: payload.users,
+      description: payload.description,
+      minimumAge: payload.minimumAge,
+      maxAge: payload.maxAge
+    }
+  );
+  socket.emit("CREATED ROOM", createdRoom);
+};
+
+const getRoomOptions = async() => {
+  let roomList = await axios.get('http://localhost:3001/api/v2/rooms')
+  return roomList
+}
+
+const deleteRoom = async(payload, socket) => {
+  let deletedRoom = await axios.delete(
+    `http://localhost:3001/api/v2/rooms/${payload.room}`);
+  socket.emit("DELETED ROOM", deletedRoom);
+};
+
+const updateRoom = async(payload, socket) => {
+  let updatedRoom = await axios.put(
+    `http://localhost:3001/api/v2/rooms/${payload.room}`,
+    {
+      name: payload.room,
+      users: payload.users,
+      description: payload.description,
+      minimumAge: payload.minimumAge,
+      maxAge: payload.maxAge
+    }
+  );
+  socket.emit("UPDATED ROOM", updatedRoom);
+};
+
+const getRoomUsers = async(payload, socket) => {
+  let roomUsers = await axios.get(
+    `http://localhost:3001/api/v2/rooms/${payload.room}`);
+  socket.emit("GOT ROOM USERS", roomUsers);
+  console.log("THIS IS THE ROOM INFORMATION" , roomUsers)
+  return roomUsers.users
+};
+
+const deleteUserInRoom = (usersInRoom , user) => {
+  let updatedUsers = usersInRoom.filter((user) => user !== user)
+  return updatedUsers
+}
+
+
+
 module.exports = {
   sendMessage,
   changeState,
@@ -95,4 +149,12 @@ module.exports = {
   receivedMessage,
   relayMessage,
   authenticate,
+  verifyRoom,
+  createRoom,
+  getRoomOptions,
+  deleteRoom,
+  updateRoom,
+  getRoomUsers,
+  deleteUserInRoom
+
 };
