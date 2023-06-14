@@ -19,4 +19,5 @@ const roomPrompt = (term, roomOptions, socket) => {
     });
 
 }
+
 module.exports = roomPrompt;

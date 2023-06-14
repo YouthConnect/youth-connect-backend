@@ -14,7 +14,7 @@ const {
 } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
-const { terminate, mainMenu, newLine, roomMenu, adminMenu } = require("./lib");
+const { terminate, mainMenu, newLine, roomMenu, adminMenu, adminRoomsMenu } = require("./lib");
 const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
@@ -125,7 +125,51 @@ term.on("key", (name, matches, data) => {
     changeState(state, socket);
   }
 
-  //? Only grab these letters if the user is not in a prompt.
+
+  /*//? ------------------------------- ADMIN MENUS ------------------------------ */
+
+  if (state.adminMenu) {
+    adminMenu(term);
+    // do admin specific commands here
+    if (name === "r") {
+
+      state.adminMenu = false;
+      state.adminRoomsMenu = true;
+      adminRoomsMenu(term);
+      // roomPrompt(term, state.roomOptions, socket);
+    }
+    //view the state
+    if (name === "v") {
+      // no need to change state here
+      term.blue(JSON.stringify(state));
+    }
+
+    if (name === "ESCAPE") {
+      mainMenu(term);
+      state.adminMenu = false;
+      state.menu = true;
+    }
+
+
+    if (state.adminRoomsMenu) {
+      // if they are in admin room menu
+      adminRoomsMenu(term);
+
+    }
+
+    if (name === "o") {
+      state.adminRoomsMenu = true;
+      state.room = false;
+      roomPrompt(term, state.roomOptions, socket); //potentially change to just view room?
+    }
+
+
+  }
+
+
+
+  /*//? ------------------------------- NORMAL MENUS ------------------------------ */
+  // Only grab these letters if the user is not in a prompt.
   if (state.menu) {
     mainMenu(term);
 
@@ -137,27 +181,6 @@ term.on("key", (name, matches, data) => {
         state.menu = false;
       }
 
-      if (state.adminMenu) {
-        adminMenu(term);
-        // do admin specific commands here
-        if ('') {
-
-        }
-
-        if (name === "ESCAPE") {
-          mainMenu(term);
-          state.adminMenu = false;
-          state.menu = true;
-        }
-
-
-      }
-    }
-    //? Start a prompt command
-
-    if (name === "v") {
-      // no need to change state here
-      term.blue(JSON.stringify(state));
     }
 
     if (name === "l") {
@@ -183,12 +206,7 @@ term.on("key", (name, matches, data) => {
       state.room = true;
     }
 
-    if (state.isAdmin) {
-      adminMenu(term);
-    }
   }
-
-
 
   //?socket.leaveRoom()
 

@@ -2,9 +2,87 @@
 
 const { newLine } = require("../client/gui/lib");
 
-const changeState = (payload, socket) => {
+const changeState = (payload, socket, recentMessages) => {
   socket.emit("CHANGE STATE", payload);
 };
+
+const authenticate = (user) => {
+  console.log("authenticated", user.username, user.password);
+
+  //? return the authenticated users's info (includes their token)
+  // socket.emit("UPDATE YOUR USER", user)
+};
+
+//! IF THIS DOESN'T WORK PUT IT BACK INTO INDEX
+const verifyRoom = (room, socket) => {
+  // Verify the room exists
+  // let roomOptions = await axios.get('localhost/rooms')
+  if (roomOptions.includes(room)) {
+    // check if they have permission join
+    // axios.get(userPermsions)? to verify user can join room or the user will have a boolean that says so
+    // update the client state with the room name
+    socket.emit("UPDATE CURRENT ROOM", room);
+
+    // they join
+    clientSocket.join(room);
+    console.log(`${serverSocket.id} joined the ${room} room.`);
+  } else {
+    console.log(`${socket.id} tried to join an invalid room: ${room}`);
+  }
+}
+
+// HANDLE MESSAGES ON THE SERVER SIDE
+const message = async (payload, socket) => {
+  if (payload.text !== '') {
+    try {
+      const currentRoomMessages = `${payload.room}RecentMessages`
+
+      let cleanWords1 = filter1.clean(payload.text);
+      let cleanWords2 = filter2.clean(cleanWords1);
+
+
+      //* Then send it to the other clients */
+
+      // push the message just submitted
+      recentMessages[currentRoomMessages].push({
+        text: cleanWords2,
+        username: payload.username,
+      });
+
+      // create and manage a list of most recent messages //? so they can be displayed in the terminal
+
+      if (recentMessages[currentRoomMessages].length > 10) {
+        // remove last message, do nothing with it
+        let lastMessage = recentMessages[currentRoomMessages].shift();
+        console.log('removed message from last 10:', lastMessage)
+      }
+
+      socket
+        .to(payload.room)
+        // Send the newly updated recent messages and reprint it when the messages get updated
+
+        .emit(
+          "SENDING RECENT MESSAGES",
+          recentMessages[currentRoomMessages]
+        ); //Room1RecentMessages
+
+      //* Then send it to database */
+      let createdMessage = await axios.post(
+        `http://localhost:3001/api/v1/messages`,
+        {
+          text: cleanWords2,
+          room: payload.room,
+          username: payload.username,
+        }
+      );
+
+      console.log("This is the created message:", createdMessage.data.text);
+    } catch (error) {
+      console.log("Error creating collection object:", error.message);
+    }
+
+  }
+}
 
 const sendMessage = (payload, socket) => {
   socket.emit("SEND MESSAGE", payload);
@@ -33,4 +111,6 @@ module.exports = {
   receiveMessage,
   receivedMessage,
   relayMessage,
+  authenticate,
+  verifyRoom,
 };
