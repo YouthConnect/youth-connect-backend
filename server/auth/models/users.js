@@ -35,7 +35,7 @@ const userModel = (sequelize, DataTypes) => {
         // get the DOB in years to compare the age ranges
         let today = new Date();
         console.log(today.getFullYear, this.DOB, parseInt(this.DOB.split('/')));
-        let age = parseInt(today.getFullYear().split('/')[2]) - parseInt(this.DOB.split('/')[2]);
+        let age = today.getFullYear() - parseInt(this.DOB.split('/')[2]);
         console.log(today, age)
         console.log(typeof rooms)
         const allRooms = await rooms.get();
