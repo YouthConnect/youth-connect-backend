@@ -6,30 +6,13 @@ const changeState = (payload, socket, recentMessages) => {
   socket.emit("CHANGE STATE", payload);
 };
 
-const authenticate = (user) => {
+const authenticate = (user, socket) => {
   console.log("authenticated", user.username, user.password);
 
   //? return the authenticated users's info (includes their token)
-  // socket.emit("UPDATE YOUR USER", user)
+  socket.emit("UPDATE YOUR USER", user.username)
 };
 
-//! IF THIS DOESN'T WORK PUT IT BACK INTO INDEX
-const verifyRoom = (room, socket) => {
-  // Verify the room exists
-  // let roomOptions = await axios.get('localhost/rooms')
-  if (roomOptions.includes(room)) {
-    // check if they have permission join
-    // axios.get(userPermsions)? to verify user can join room or the user will have a boolean that says so
-    // update the client state with the room name
-    socket.emit("UPDATE CURRENT ROOM", room);
-
-    // they join
-    clientSocket.join(room);
-    console.log(`${serverSocket.id} joined the ${room} room.`);
-  } else {
-    console.log(`${socket.id} tried to join an invalid room: ${room}`);
-  }
-}
 
 // HANDLE MESSAGES ON THE SERVER SIDE
 const message = async (payload, socket) => {
@@ -173,4 +156,5 @@ module.exports = {
   updateRoom,
   getRoomUsers,
   deleteUserInRoom
+
 };
