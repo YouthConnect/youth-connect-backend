@@ -6,8 +6,6 @@ const term = require("terminal-kit").terminal;
 const { io } = require("socket.io-client");
 const socket = io("http://localhost:3001");
 
-const roomOptions = require("../../index");
-
 //? require functions from the socket client lib that contains basic handlers for our socket client
 const {
   changeState,
@@ -28,8 +26,13 @@ const roomPrompt = require("./prompts/roomPrompt");
 socket.on("RELAY MESSAGE", (payload) => receiveMessage(term, payload, socket));
 
 socket.on("MESSAGE", (payload) => {
-  receiveMessage(term, payload, state, "currentMessage", socket);
+  //receiveMessage(term, payload, state, "currentMessage", socket);
 });
+
+socket.on("UPDATED ROOMS", (payload) => {
+  state.roomOptions = payload;
+})
+
 socket.on("GO BACK TO ROOM", (payload) => {
   state.room = true;
   //mainMenu(term);
@@ -60,9 +63,12 @@ socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
 });
 
 socket.on("SENDING RECENT MESSAGES", (payload) => {
-  payload.forEach((message) =>
-    term.blue(`\n${message.username}: ${message.text}\n`)
-  );
+  if (state.room) {
+    roomMenu(term);
+    payload.forEach((message) =>
+      term.blue(`\n${message.username}: ${message.text}\n`)
+    );
+  }
 }); // payload = [message1, message2, ....]
 
 //ask server to give us the most recent messages
@@ -71,6 +77,10 @@ const askForRecentMessages = () => {
     socket.emit("GET RECENT MESSAGES", state.selectedRoom);
   }
 };
+
+askForUpdatedRooms = () => {
+  socket.emit("GIVE ME UPDATED ROOMS", {})
+}
 
 // create a state to represent information like what menu/action is happening right
 const state = {
@@ -82,6 +92,9 @@ const state = {
   selectedRoom: null,
   username: `bobby ${Math.random()}`,
 };
+
+//*do requests that need to be done async before users interact with terminal!
+askForUpdatedRooms();
 
 //? mainMenu to introduce features and concepts of the terminal-kit
 mainMenu(term);
@@ -132,8 +145,8 @@ term.on("key", (name, matches, data) => {
       // update the state so the functions work correctly
       state.menu = false;
       state.room = true;
-      //console.log(roomOptions)
-      roomPrompt(term, roomOptions, socket);
+      //console.log(state.roomOptions)
+      roomPrompt(term, state.roomOptions, socket);
     }
   }
 
@@ -154,6 +167,7 @@ term.on("key", (name, matches, data) => {
     roomMenu(term, state.selectedRoom);
     //! get the messages
     askForRecentMessages(state.selectedRoom);
+
     if (name === "m") {
       state.chat = true;
       state.room = false;
@@ -164,7 +178,7 @@ term.on("key", (name, matches, data) => {
     if (name === "CTRL_R") {
       state.menu = true;
       state.room = false;
-      roomPrompt(term, roomOptions, socket);
+      roomPrompt(term, state.roomOptions, socket);
     }
 
     // press escape function
@@ -184,5 +198,3 @@ term.grabInput({ mouse: "button" });
 
 //?^ if you comment this out it will allow you to use the terminal normally and terminal-kit will not take over everything.
 //* BUT if we don't use it we will not have access to actually grabbing the inputs and doing things with it */
-// export the menu STATE so it can be accessed elsewhere
-module.exports = state;
