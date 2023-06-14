@@ -4,6 +4,8 @@
 //TODO - Admin features/moderation/control/create rooms and manage them
 //Dot env at top just to be safe
 require("dotenv").config();
+
+
 const PORT = process.env.PORT;
 
 const { app } = require('./server/server.js')
@@ -13,6 +15,10 @@ const server = http.createServer(app);
 //? create socket server HUB
 const { Server } = require("socket.io");
 const io = new Server(server);
+const axios = require('axios');
+const {rooms, messages, userModule, db}= require ('./server/models/index.js')
+
+
 
 // const testRouter = require("./server/server.js");
 // app.use(testRouter);
@@ -46,8 +52,21 @@ io.on("connection", (socket) => {
     //? Sanitize it (turn bad word into f***) --> use AEDOS'
     //* Then send it to the other clients */
     socket.broadcast.emit("MESSAGE", payload);
+
+    try {
+      const createdMessage = messages.create({
+        text: payload.text,
+        room: payload.room,
+        user: payload.user
+      });
+      console.log('This is the created message:', createdMessage);
+    } catch (error) {
+      console.log('Error creating collection object:', error.message);
+    }
+
     //* Then send it to database */
-    // EXAMPLE -> await axios.post('localhost/messages', {text, room, user})
+    // let messageData = messages.create({"text":"your uncle","room":"Room 1", "user":"Bob"});
+// console.log('This is the MESSAGE DATA' , messageData);
     // when server receives a message, make the client start their prompt so it continues the cycle
     socket.emit("GO BACK TO ROOM", {});
   });
@@ -99,6 +118,7 @@ io.on("connection", (socket) => {
 
 
 server.listen(PORT, () => {
+db.sync()
   console.log("listening on *:", PORT);
 });
 
