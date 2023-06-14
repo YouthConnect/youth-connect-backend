@@ -14,6 +14,7 @@ const userModel = (sequelize, DataTypes) => {
       required: true,
       defaultValue: "user",
     },
+    DOB: { type: DataTypes.STRING, required: true }, // '03/06/2010'
     token: {
       type: DataTypes.VIRTUAL,
       get() {

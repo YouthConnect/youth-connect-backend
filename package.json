@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "auth0": "^3.4.0",
+    "axios": "^1.4.0",
     "bad-words": "^3.0.4",
     "base-64": "^1.0.0",
     "bcrypt": "^5.1.0",
