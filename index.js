@@ -39,22 +39,7 @@ const { Statement } = require("sqlite3");
 // await axios.get(/rooms/room1/last10)
 //create a feed of only the most recent messages from the database in real time
 let recentMessages = {
-  Room1RecentMessages: [
-    { username: "John", text: "hello" },
-    { username: "Bob", text: "hello" },
-    { username: "John", text: "how are you?" },
-    { username: "Bob", text: "good, you?" },
-    { username: "John", text: "im good" },
-    { username: "Bob", text: "great!" },
-  ],
-  Room2RecentMessages: [
-    { username: "John", text: "hello" },
-    { username: "Bob", text: "hello" },
-  ],
-  Room3RecentMessages: [
-    { username: "John", text: "hello" },
-    { username: "Bob", text: "hello" },
-  ],
+
 };
 
 //pass in the socket(that connected/made a request) to each of these functions
@@ -88,15 +73,15 @@ io.on("connection", (socket) => {
 
 
   /* //?------------------------------ HANDLE ROOMS ------------------------------ */
-  //! IF THIS ISN"T AWAITED AFTER MERGING PLEASE AWAIT IT
-  socket.on("CREATE ROOM", (payload) => {
+
+  socket.on("CREATE ROOM", async (payload) => {
     //TODO - create a room in the database
     createRoom(payload, socket);
     //TODO - update the room options
-    let roomList = getRoomOptions();
+    let roomList = await getRoomOptions();
     //TODO - send the updated room options to the client
 
-    socket.emit("UPDATED ROOMS", roomList);
+    socket.emit("UPDATED ROOMS", roomList.data);
   });
 
   socket.on("GIVE ME UPDATED ROOMS", async (payload) => {
@@ -107,11 +92,7 @@ io.on("connection", (socket) => {
   // TODO handle join room event
 
   socket.on("join", async (payload) => {
-    // get roomList
-    // recentMessages
-    // [ [{...}, {... }], [{...}] ]
-    // roomList.data
-    // [ {..}, {..} ]
+
     let roomList = await getRoomOptions();
     let rooms = roomList.data;
     // this returns and array, not an object
@@ -173,6 +154,15 @@ io.on("connection", (socket) => {
     socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
   });
 
+  socket.on("UPDATE ROOM NAME", payload => {
+   socket.emit("UPDATE ROOM NAME", payload)
+  })
+
+   socket.on("UPDATE USER NAME", payload => {
+
+    socket.emit("UPDATE USER NAME", payload)
+  })
+
   //TODO - handle leave room event
   socket.on("LEAVE ROOM", (payload) => {
     //TODO - update the users in the room
@@ -224,6 +214,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("HERES MY CREDENTIALS", (payload) => {
+    console.log(payload)
     authenticate(payload, socket);
   });
 });
@@ -235,6 +226,8 @@ db.sync().then(() => {
     console.log("listening on *:", PORT);
   });
 });
+
+module.exports = server;
 
 /* //? TODO
   socket.on("ADMIN VIEW ROOM", (payload) => {

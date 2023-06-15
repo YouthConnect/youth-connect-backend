@@ -15,16 +15,17 @@ const changeState = (payload, socket, recentMessages) => {
 };
 
 const authenticate = async (user, socket) => {
-  console.log("authenticated", user.username, user.password);
+  try {
   //base64 encode the data in format '${user}:${pass}'
   let formattedData = base64.encode(`${user.username}:${user.password}`);
   // send properly formated data to signin route //* in the authorization header as `Basic ${formatedData}`*/
-  let validatedUser = await axios.post('http://localhost:3001/signin', {}, { headers: { Authorization: `Basic ${formattedData}` } });
-
-  //return the validated user through socket
+    let validatedUser = await axios.post('http://localhost:3001/signin', {}, { headers: { Authorization: `Basic ${formattedData}` } });
 
   //? return the authenticated users's info (includes their token)
   socket.emit("UPDATE YOUR USER", validatedUser.data.user);
+  } catch( error) {
+    console.log(error.message)
+  }
 };
 
 // HANDLE MESSAGES ON THE SERVER SIDE
@@ -94,14 +95,14 @@ const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
 };
 
 const createRoom = async (payload, socket) => {
-  let createdRoom = await axios.post(`http://localhost:3001/api/v2/rooms`, {
-    name: payload.room,
+  let createdRoom = await axios.post(`http://localhost:3001/api/v1/rooms`, {
+    name: payload.name,
     users: payload.users,
     description: payload.description,
     minimumAge: payload.minimumAge,
     maxAge: payload.maxAge,
   });
-  socket.emit("CREATED ROOM", createdRoom);
+  socket.emit("CREATED ROOM", createdRoom.data);
 };
 
 const getRoomOptions = async () => {
@@ -118,7 +119,7 @@ const deleteRoom = async (payload, socket) => {
 
 const updateRoom = async (payload, socket) => {
   let updatedRoom = await axios.put(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`,
+    `http://localhost:3001/api/v1/rooms/${payload.room}`,
     {
       name: payload.room,
       users: payload.users,
@@ -146,7 +147,7 @@ const deleteUserInRoom = (usersInRoom, user) => {
 
 const createUser = async (payload, socket) => {
   let createdUser = await axios.post(
-    `http://localhost:3001/api/v2/users`,
+    `http://localhost:3001/api/v1/users`,
     {
     username: payload.username,
     password: payload.password,

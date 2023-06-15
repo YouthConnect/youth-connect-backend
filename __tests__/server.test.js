@@ -5,12 +5,13 @@ process.env.SECRET = "TEST_SECRET";
 const supertest = require("supertest");
 const base64 = require("base-64");
 
-const { server } = require("../../src/server.js");
-const { db } = require("../../src/models/index");
+const app = require("../server/server.js");
+const server = require('../index.js')
+const { db } = require("../server/models/index");
 
-const permissions = require("../../src/auth/middleware/acl");
-const basic = require("../../src/auth/middleware/basic");
-const bearer = require("../../src/auth/middleware/bearer");
+const permissions = require("../server/auth/middleware/acl");
+const basic = require("../server/auth/middleware/basic");
+const bearer = require("../server/auth/middleware/bearer");
 const { expect } = require("@jest/globals");
 
 beforeAll(async () => {
@@ -22,8 +23,9 @@ afterAll(async () => {
 });
 
 let userData = {
-  testUser: { username: "user", password: "password" },
-  testAdmin: { username: "admin", password: "admin", role: "admin" },
+  testUser: { username: "user", password: "password", DOB: "01/10/2020" },
+  testUser2: { username: "user", password: "password", DOB: "01/10/1980" },
+  testAdmin: { username: "admin", password: "admin", DOB: "01/10/1980", role: "admin" },
 };
 
 let badAccessToken = null;
@@ -72,59 +74,43 @@ describe("Server", () => {
 
   it("handles POST to v1", async () => {
     const response = await request
-      .post("/api/v1/clothes")
-      .send({ name: "shirt", size: "medium", color: "blue" });
-    const shirt2 = await request
-      .post("/api/v1/clothes")
-      .send({ name: "shirt", size: "small", color: "red" });
+      .post("/api/v1/rooms")
+      .send({ name: "teens", description: "teens only", minimumAge: 12, maxAge: 17 });
+    const room2 = await request
+      .post("/api/v1/rooms")
+      .send({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
 
     expect(response.status).toEqual(201);
-    expect(response.body).toMatchObject({
-      name: "shirt",
-      size: "medium",
-      color: "blue",
-    });
-    expect(shirt2.body).toMatchObject({
-      name: "shirt",
-      size: "small",
-      color: "red",
-    });
+    expect(response.body).toMatchObject({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
+    expect(room2.body).toMatchObject({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
   });
 
   it("handles GET all from v1", async () => {
-    const response = await request.get("/api/v1/clothes");
+    const response = await request.get("/api/v1/rooms");
 
     expect(response.status).toEqual(200);
-    expect(response.body.length).toEqual(2);
+    expect(response.body.length).toEqual(3);
   });
   it("handles GET one from v1", async () => {
-    const response = await request.get("/api/v1/clothes/1");
+    const response = await request.get("/api/v1/rooms/1");
 
     expect(response.status).toEqual(200);
     expect(response.body.length).toBeUndefined();
-    expect(response.body).toMatchObject({
-      name: "shirt",
-      size: "medium",
-      color: "blue",
-    });
+    expect(response.body).toMatchObject({ name: "teens", description: "teens only", minimumAge: 12, maxAge: 17 });
   });
 
   it("handles UPDATE to v1", async () => {
     const response = await request
-      .put("/api/v1/clothes/1")
+      .put("/api/v1/rooms/1")
       .send({ name: "pants" });
 
     expect(response.status).toEqual(200);
-    expect(response.body).toMatchObject({
-      name: "pants",
-      size: "medium",
-      color: "blue",
-    });
+    expect(response.body).toMatchObject({ name: "pants", description: "teens only", minimumAge: 12, maxAge: 17 });
   });
 
   it("handles BAD UPDATE to v1", async () => {
     const response = await request
-      .put("/api/v2/clothes/3")
+      .put("/api/v2/clothes/10")
       .set("Authorization", `Bearer ${goodAccessToken}`)
       .send({ name: "hat", size: "fits-all" });
 
@@ -135,11 +121,11 @@ describe("Server", () => {
   it("handles DELETE to to v1", async () => {
     const createIt = await request
       .post("/api/v1/clothes")
-      .send({ name: "test", size: "test", color: "test" });
+      .send({ name: "something", description: "something", minimumAge: 12, maxAge: 17 });
 
-    const deleteIt = await request.delete("/api/v1/clothes/3");
+    const deleteIt = await request.delete("/api/v1/clothes/4");
 
-    const findIt = await request.get("/api/v1/clothes/3");
+    const findIt = await request.get("/api/v1/clothes/4");
 
     expect(createIt.status).toEqual(201);
     expect(deleteIt.status).toBe(200);
@@ -154,67 +140,54 @@ describe("Server", () => {
 
   it("handles POST to v2", async () => {
     const response = await request
-      .post("/api/v2/clothes")
+      .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "shoes", size: "medium", color: "blue" });
-    const shoes2 = await request
-      .post("/api/v2/clothes")
+      .send({ name: "kids", description: "kids only", minimumAge: 6, maxAge: 12 });
+    const rooms2 = await request
+      .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "shoes", size: "small", color: "red" });
+      .send({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
 
     expect(response.status).toEqual(201);
-    expect(response.body).toMatchObject({
-      name: "shoes",
-      size: "medium",
-      color: "blue",
-    });
-    expect(shoes2.body).toMatchObject({
-      name: "shoes",
-      size: "small",
-      color: "red",
-    });
+    expect(response.body).toMatchObject({ name: "kids", description: "kids only", minimumAge: 6, maxAge: 12 });
+    expect(rooms2.body).toMatchObject({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
   });
 
   it("handles GET all from v2", async () => {
     const response = await request
-      .get("/api/v2/clothes")
+      .get("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`);
 
     expect(response.status).toEqual(200);
-    expect(response.body.length).toEqual(4);
+    expect(response.body.length).toEqual(5);
   });
   it("handles GET one from v2", async () => {
     const response = await request
-      .get("/api/v2/clothes/4")
+      .get("/api/v2/rooms/5")
       .set("Authorization", `Bearer ${goodAccessToken}`);
 
     expect(response.status).toEqual(200);
-    expect(response.body).toMatchObject({
-      name: "shoes",
-      size: "medium",
-      color: "blue",
-    });
+    expect(response.body).toMatchObject({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
   });
 
   it("handles UPDATE to v2", async () => {
     const response = await request
-      .put("/api/v2/clothes/4")
+      .put("/api/v2/rooms/4")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "hat", size: "fits-all" });
+      .send({ name: "hat", description: "do you like hats?" });
 
     expect(response.status).toEqual(200);
     expect(response.body).toMatchObject({
       name: "hat",
-      size: "fits-all",
-      color: "blue",
+      description: "do you like hats?"
     });
   });
 
   it("handles BAD UPDATE to v2", async () => {
     const response = await request
-      .put("/api/v2/clothes/3")
+      .put("/api/v2/rooms/8")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "hat", size: "fits-all" });
+      .send({ name: "adults5", description: "adults again??"});
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual("That item could not be updated.");
@@ -222,16 +195,16 @@ describe("Server", () => {
 
   it("handles DELETE to to v2", async () => {
     const createIt = await request
-      .post("/api/v2/clothes")
+      .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "test", size: "test", color: "test" });
+      .send({ name: "adults5", description: "adults over and over", minimumAge: 18, maxAge: 100 });
 
     const deleteIt = await request
-      .delete("/api/v2/clothes/6")
+      .delete("/api/v2/rooms/7")
       .set("Authorization", `Bearer ${goodAccessToken}`);
 
     const findIt = await request
-      .get("/api/v2/clothes/6")
+      .get("/api/v2/rooms/7")
       .set("Authorization", `Bearer ${goodAccessToken}`);
 
     expect(createIt.status).toEqual(201);
@@ -243,9 +216,9 @@ describe("Server", () => {
 
   it("handles UNAUTHORIZED DELETE to v2", async () => {
     const response = await request
-      .delete("/api/v2/clothes/4")
+      .delete("/api/v2/rooms/4")
       .set("Authorization", `Bearer ${badAccessToken}`)
-      .send({ name: "hat", size: "fits-all" });
+      .send({ name: "adults" });
 
     expect(response.status).toEqual(500);
     expect(response.body).toEqual({ message: "Invalid Login", status: 500 });

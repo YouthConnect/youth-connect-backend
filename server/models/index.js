@@ -23,5 +23,5 @@ module.exports = {
   rooms: new Collection(rooms),
   roomsModule: rooms,
   // ? Auth route is made to use raw models
-  userModule:users, //* Use both */
+  userModule: users, //* Use both */
 };

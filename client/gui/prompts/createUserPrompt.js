@@ -15,7 +15,6 @@ const createUserPrompt = async (term, socket) => {
 
         socket.emit('UPDATE USER NAME', input)
 
-
     }).promise//? Create this input as a promis so it can be awaited and returned
 
     console.log(username)

@@ -7,7 +7,7 @@
     "dev": "nodemon index.js",
     "start": "node index.js",
     "client-dev": "nodemon ./client/gui/guiIndex.js",
-    "test": "jest --verbose --coverage",
+    "test": "NODE_ENV=test jest --verbose --coverage",
     "init:config": "sequelize init:config",
     "db:create": "sequelize db:create"
   },
@@ -34,6 +34,7 @@
     "socket.io": "^4.6.2",
     "socket.io-client": "^4.6.2",
     "sqlite3": "^5.1.6",
+    "supertest": "^6.3.3",
     "terminal-kit": "^3.0.0"
   }
 }
