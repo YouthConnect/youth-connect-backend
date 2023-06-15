@@ -32,9 +32,6 @@ const {
 
 const { Statement } = require("sqlite3");
 
-//?Update this later let roomOptions = await database.get("rooms")
-let roomOptions = ["Room1", "Room2", "Room3"];
-
 // TODO When the server starts create the rooms from the database
 
 // await axios.get(/rooms/room1/last10)
@@ -93,23 +90,35 @@ io.on("connection", (socket) => {
   // TODO handle join room event
 
   socket.on("join", async (payload) => {
+    // get roomList
+    // recentMessages
+    // [ [{...}, {... }], [{...}] ]
+    // roomList.data
+    // [ {..}, {..} ]
     let roomList = await getRoomOptions();
+    let rooms = roomList.data;
+    // this returns and array, not an object
+    let room = rooms.filter(room => room.name === payload.room)
+    let currentRoom = room[0];
+
     let today = new Date();
     let age = today.getFullYear() - parseInt(payload.user.DOB.split("/"));
 
     if (payload.room === "admins") {
       socket.join(payload.room);
-    }
+    } else {
       // check if they have permission join
-      if (age > 10) {
+
+      if (age > currentRoom.minimumAge && age < currentRoom.maxAge || payload.user.username === 'admin' ) {
         console.log("You can enter this room");
         socket.emit("UPDATE CURRENT ROOM", payload.room);
         socket.join(payload.room);
         console.log(`${socket.id} joined the ${payload.room} room.`);
       } else {
         console.log("you cant enter");
+        socket.emit("GO TO MENU", {})
       }
-
+    }
   });
 
   // when user leaves a room leave it
@@ -172,9 +181,14 @@ io.on("connection", (socket) => {
 
   // handle giving the recent messages to the client
   socket.on("GET RECENT MESSAGES", (payload) => {
+    let messagePayload
+    if(!recentMessages[`${payload}RecentMessages`]){
+      messagePayload = [];
+    } else { messagePayload = recentMessages[`${payload}RecentMessages`] }
+
     socket.emit(
       "SENDING RECENT MESSAGES",
-      recentMessages[`${payload}RecentMessages`]
+      messagePayload
     ); //Room1RecentMessages
   });
 

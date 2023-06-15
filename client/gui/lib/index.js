@@ -48,8 +48,6 @@ const mainMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -98,8 +96,6 @@ const adminMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -127,8 +123,6 @@ const adminRoomsMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -157,8 +151,6 @@ const adminUsersMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");

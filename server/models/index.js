@@ -2,7 +2,7 @@
 
 const { Sequelize, DataTypes } = require("sequelize");
 
-const userModel = require("./users.js");
+const userModel = require("../auth/models/users.js");
 const roomModel = require("./rooms/model.js");
 const messageModel = require("./messages/model.js");
 const Collection = require("./data-collection.js");

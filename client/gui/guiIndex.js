@@ -49,10 +49,19 @@ socket.on("UPDATE PASSWORD", (payload) => {
   socket.emit("VERIFY USER", {});
 });
 
+socket.on("GO TO MENU", payload => {
+  state.selectedRoom = '';
+  state.room = false;
+  state.menu = true;
+  term.red('You cannot enter that room')
+})
+
 socket.on("UPDATE CURRENT ROOM", (payload) => {
-  state.selectedRoom = payload;
-  state.room = true;
-  roomMenu(term, payload);
+  if (payload !== "admins") {
+    state.selectedRoom = payload;
+    state.room = true;
+    roomMenu(term, payload);
+  }
 });
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
@@ -64,10 +73,16 @@ socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
 });
 
 socket.on("SENDING RECENT MESSAGES", (payload) => {
+
   if (state.room) {
     roomMenu(term);
-    payload.forEach((message) =>
-      term.blue(`\n\t${message.username}: ${message.text}`)
+    payload.forEach((message) => {
+      if (message.username === 'admin') {
+        term.green(`\n\t${message.username}: ${message.text}`)
+      } else {
+        term.blue(`\n\t${message.username}: ${message.text}`)
+      }
+    }
     );
   }
 }); // payload = [message1, message2, ....]
@@ -83,7 +98,7 @@ socket.on("IM HERE ADMINS", (payload) => {
 socket.on("UPDATE YOUR USER", (payload) => {
   if (payload.username === "admin") {
     term.red("\nyou are an admin");
-    socket.emit("join", {user: payload, room: 'admins'});
+    socket.emit("join", { user: payload, room: 'admins' });
   }
   // Very first time we set user when they log in
   state.user = payload;
@@ -98,6 +113,12 @@ const askForConnectedUsers = () => {
     socket.emit("GET_CONNECTED_USERS", {});
   }
 };
+
+const leaveRoom = () => {
+  term(`You have left: ${state.selectedRoom}`);
+  socket.emit('leave', state.selectedRoom ? state.selectedRoom : '')
+  state.selectedRoom = '';
+}
 
 //ask server to give us the most recent messages
 const askForRecentMessages = () => {
@@ -118,7 +139,7 @@ const state = {
   basicPrompt: "null",
   currentMessage: "null",
   selectedRoom: null,
-  username: `frolic`,
+  username: `not-logged-in`,
   isAdmin: false,
 };
 
@@ -159,6 +180,10 @@ term.on("key", (name, matches, data) => {
     if (name === "v") {
       // no need to change state here
       term.blue(JSON.stringify(state));
+
+    }
+
+    if (name === 'u') {
       askForConnectedUsers();
     }
 
@@ -249,7 +274,7 @@ term.on("key", (name, matches, data) => {
       state.menu = true;
       state.room = false;
       // leave the room in socket server when user exits room menu
-      //socket.emit('leave', state.selectedRoom)
+      leaveRoom()
     }
   }
 });
