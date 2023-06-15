@@ -26,6 +26,7 @@ const {
   authenticate,
   verifyRoom,
   createRoom,
+  createUser,
   getRoomOptions,
   deleteRoom,
   updateRoom,
@@ -75,6 +76,18 @@ io.on("connection", (socket) => {
   socket.on("I AM HERE", (username) => {
     socket.to("admins").emit("IM HERE ADMINS", username);
   });
+   /* //?------------------------------ HANDLE USERS ------------------------------ */
+// TODO Create a user
+socket.on("CREATE USER", (payload) => {
+  //TODO - create a user in the database
+  let userInfo=createUser(payload, socket);
+socket.emit("UPDATE YOUR USER", userInfo);
+
+});
+
+
+
+
 
   /* //?------------------------------ HANDLE ROOMS ------------------------------ */
   socket.on("CREATE ROOM", (payload) => {

@@ -2,6 +2,7 @@
 
 const { newLine } = require("../client/gui/lib");
 const axios = require("axios");
+const { DataTypes } = require("sequelize");
 
 const changeState = (payload, socket, recentMessages) => {
   socket.emit("CHANGE STATE", payload);
@@ -134,6 +135,21 @@ const deleteUserInRoom = (usersInRoom, user) => {
   return updatedUsers;
 };
 
+const createUser = async (payload, socket) => {
+  let createdUser = await axios.post(
+    `http://localhost:3001/api/v2/users`,
+    {
+    username: payload.username,
+    password: payload.password,
+    DOB: payload.DOB,
+    }
+  );
+  socket.emit("CREATED USER", createdUser);
+  console.log("THIS IS THE CREATED USER------------", createdUser);
+  return createdUser;
+};
+
+
 module.exports = {
   sendMessage,
   changeState,
@@ -143,6 +159,7 @@ module.exports = {
   authenticate,
   message,
   createRoom,
+  createUser,
   getRoomOptions,
   deleteRoom,
   updateRoom,

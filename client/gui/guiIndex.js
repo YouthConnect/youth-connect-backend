@@ -28,6 +28,7 @@ const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
 const roomPrompt = require("./prompts/roomPrompt");
 const createRoomPrompt = require("./prompts/createRoomPrompt");
+const createUserPrompt = require("./prompts/createUserPrompt");
 
 // Socket handlers for the client
 // socket.onAny((event, payload) => receivedMessage(event, payload, socket))
@@ -87,6 +88,18 @@ socket.on("TELL ME YOU ARE HERE", (payload) => {
 socket.on("IM HERE ADMINS", (payload) => {
   term.green(payload);
 });
+
+socket.on("CREATED USER", (payload) => {
+  socket.emit("CREATE USER", {
+    username: payload,
+    password: "password",
+    DOB: "01/01/2000",
+  });
+  state.menu = false;
+  state.adminUsersMenu= true;
+});
+
+
 
 socket.on("UPDATE YOUR USER", (payload) => {
   if (payload === "admin") {
@@ -172,9 +185,13 @@ term.on("key", (name, matches, data) => {
   }
 
   /*//? ------------------------------- ADMIN MENUS ------------------------------ */
- if (state.adminUsersMenu) {
+//create user
+  if (state.adminUsersMenu) {
   if (name === "c") {
-
+    state.adminUsersMenu = false;
+state.adminMenu = false;
+console.log("create user prompt")
+createUserPrompt(term, socket);
   }
  }
 if (state.adminRoomsMenu) {
@@ -185,6 +202,7 @@ console.log("create room prompt")
 createRoomPrompt(term, socket);
   }
 }
+
 
   if (state.adminMenu) {
     adminMenu(term);
