@@ -48,8 +48,6 @@ const mainMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -93,11 +91,11 @@ const adminMenu = (term) => {
   newLine(term);
   term.blue('Please press "u" for admin users menu');
   newLine(term);
+  term.blue('Please press "k" to view user controls');
+  newLine(term);
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -125,8 +123,6 @@ const adminRoomsMenu = (term) => {
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
@@ -150,13 +146,11 @@ const adminUsersMenu = (term) => {
   newLine(term);
   term.blue('Please press "d" to delete users');
   newLine(term);
-  term.blue('Please press "a" to add a user to a room'); //logs all the users connected
+  term.blue('Please press "v" to view a user by name'); //logs all the users connected
   newLine(term);
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
   term.red("in order to close this terminal, CTRL+C or END");
-  newLine(term.green);
-  newLine(term.red.bold.bgGreen);
   newLine(term, false);
   newLine(term, false); // easily decide whether or not to include that dash
   term(":");
