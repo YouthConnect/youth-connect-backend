@@ -2,9 +2,9 @@
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dataModules = require("./index.js");
+const dataModules = require("../../models/index.js");
 console.log(dataModules);
-const { rooms } = require("./index.js");
+const { rooms } = require("../../models/index.js");
 const roomModuleGOOD = rooms;
 console.log(rooms);
 const axios = require("axios");

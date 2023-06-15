@@ -149,6 +149,15 @@ const createUser = async (payload, socket) => {
   return createdUser;
 };
 
+const getUsers = async (payload, socket) => {
+let getAllUsers = await axios.get(
+  `http://localhost:3001/api/v1/users`,
+);
+socket.emit("GET ALL USERS", getAllUsers.data);
+console.log("THIS IS ALL USERS------", getAllUsers.data);
+return getAllUsers.data;
+};
+
 
 module.exports = {
   sendMessage,
@@ -160,6 +169,7 @@ module.exports = {
   message,
   createRoom,
   createUser,
+  getUsers,
   getRoomOptions,
   deleteRoom,
   updateRoom,
