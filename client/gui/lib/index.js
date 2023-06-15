@@ -138,19 +138,19 @@ const adminUsersMenu = (term) => {
 
   newLine(term);
   newLine(term);
-  term.magenta("Room Controls");
+  term.magenta("User Controls");
   newLine(term);
   term.brightRed("LOGGED IN AS ADMIN");
   newLine(term);
   term.blue('Please press "c" to create users');
   newLine(term);
-  term.blue('Please press "o" to see a list of rooms');
+  term.blue('Please press "l" to see a list of all the users');
   newLine(term);
-  term.blue('Please press "u" to update rooms');
+  term.blue('Please press "u" to update users');
   newLine(term);
-  term.blue('Please press "d" to delete rooms');
+  term.blue('Please press "d" to delete users');
   newLine(term);
-  term.blue('Please press "v" to view a room by name'); //logs all the users connected
+  term.blue('Please press "a" to add a user to a room'); //logs all the users connected
   newLine(term);
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);
@@ -171,4 +171,5 @@ module.exports = {
   roomMenu,
   adminMenu,
   adminRoomsMenu,
+  adminUsersMenu,
 };
