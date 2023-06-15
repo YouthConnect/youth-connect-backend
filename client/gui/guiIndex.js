@@ -27,6 +27,7 @@ const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
 const roomPrompt = require("./prompts/roomPrompt");
+const createRoomPrompt = require("./prompts/createRoomPrompt");
 
 // Socket handlers for the client
 // socket.onAny((event, payload) => receivedMessage(event, payload, socket))
@@ -95,6 +96,18 @@ socket.on("UPDATE YOUR USER", (payload) => {
   state.userId = payload.id;
 });
 
+socket.on("UPDATE ROOM NAME", (payload) => {
+  socket.emit("CREATE ROOM", {
+    name: payload,
+    users:null,
+    description: `MAIN ROOM ${payload}`,
+    minimumAge: 12,
+    maxAge: 99,
+  });
+  state.menu = false;
+  state.adminRoomsMenu= true;
+});
+
 //ask server for all users connected
 
 const askForConnectedUsers = () => {
@@ -161,13 +174,14 @@ term.on("key", (name, matches, data) => {
   /*//? ------------------------------- ADMIN MENUS ------------------------------ */
  if (state.adminUsersMenu) {
   if (name === "c") {
-    
+
   }
  }
 if (state.adminRoomsMenu) {
   if (name === "c") {
     state.adminRoomsMenu = false;
-    state.room = true;
+state.adminMenu = false;
+console.log("create room prompt")
 createRoomPrompt(term, socket);
   }
 }
@@ -179,6 +193,7 @@ createRoomPrompt(term, socket);
       state.adminMenu = false;
       state.adminRoomsMenu = true;
       adminRoomsMenu(term);
+      console.log("admin rooms menu");
       // roomPrompt(term, state.roomOptions, socket);
     }
 
