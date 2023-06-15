@@ -9,8 +9,6 @@ const socket = io("http://localhost:3001");
 //? require functions from the socket client lib that contains basic handlers for our socket client
 const {
   changeState,
-  receiveMessage,
-  receivedMessage,
 } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
@@ -28,9 +26,6 @@ const passwordPrompt = require("./prompts/passwordPrompt");
 const roomPrompt = require("./prompts/roomPrompt");
 
 // Socket handlers for the client
-// socket.onAny((event, payload) => receivedMessage(event, payload, socket))
-//this is not on the UML
-socket.on("RELAY MESSAGE", (payload) => receiveMessage(term, payload, socket));
 
 socket.on("MESSAGE", (payload) => {
   //receiveMessage(term, payload, state, "currentMessage", socket);
@@ -55,7 +50,6 @@ socket.on("UPDATE PASSWORD", (payload) => {
 });
 
 socket.on("UPDATE CURRENT ROOM", (payload) => {
-  // update the current room state?
   state.selectedRoom = payload;
   state.room = true;
   roomMenu(term, payload);
@@ -87,11 +81,13 @@ socket.on("IM HERE ADMINS", (payload) => {
 });
 
 socket.on("UPDATE YOUR USER", (payload) => {
-  if (payload === "admin") {
-    console.log("joining admins");
-    socket.emit("join", "admins");
+  if (payload.username === "admin") {
+    term.red("\nyou are an admin");
+    socket.emit("join", {user: payload, room: 'admins'});
   }
-  state.userId = payload.id;
+  // Very first time we set user when they log in
+  state.user = payload;
+
 });
 
 //ask server for all users connected
@@ -122,31 +118,22 @@ const state = {
   basicPrompt: "null",
   currentMessage: "null",
   selectedRoom: null,
-  username: `bobby ${Math.random()}`,
+  username: `frolic`,
   isAdmin: false,
 };
 
-//*do requests that need to be done async before users interact with terminal!
+//!do requests that need to be done async before users interact with terminal!
 askForUpdatedRooms();
-
-//? mainMenu to introduce features and concepts of the terminal-kit
-mainMenu(term);
 
 // get mouse clicks and scroll wheel
 term.on("mouse", (name, matches, data) => {
-  //console.log("mouse:", name, data);
 
   if (name === "MOUSE_RIGHT_BUTTON_PRESSED") {
+
   }
 });
-// get key inputs
-term.on("key", (name, matches, data) => {
-  //? console.log("keyboard", name, data);
 
-  //TODO LASSSTTT
-  /*if (user.isAdmin && state.isAdmin) {
-    showAdminToolColumnSelectorPrompt();
-  }*/
+term.on("key", (name, matches, data) => {
 
   if (name === "END" || name === "CTRL_C") {
     terminate(term);
@@ -184,12 +171,18 @@ term.on("key", (name, matches, data) => {
     if (state.adminRoomsMenu) {
       // if they are in admin room menu
       adminRoomsMenu(term);
+
+      if (name === "ESCAPE") {
+        adminMenu(term);
+        state.adminMenu = true;
+        state.adminRoomsMenu = false;
+      }
     }
 
     if (name === "o") {
       state.adminRoomsMenu = false;
       state.room = true;
-      roomPrompt(term, state.roomOptions, state.userId, socket); //potentially change to just view room?
+      roomPrompt(term, state.roomOptions, state.user, socket); //potentially change to just view room?
     }
   }
 
@@ -218,7 +211,7 @@ term.on("key", (name, matches, data) => {
       state.menu = false;
       state.room = true;
       //console.log(state.roomOptions)
-      roomPrompt(term, state.roomOptions, state.userId, socket);
+      roomPrompt(term, state.roomOptions, state.user, socket);
     }
   }
 
@@ -230,19 +223,16 @@ term.on("key", (name, matches, data) => {
     }
   }
 
-  //?socket.leaveRoom()
-
-  //TODO get the list of most recent messages when on the room page.
-  //TODO when on the room page, update the list of messages while idle
   if (state.room) {
     // pass term to use it, and room name to print the room name
     roomMenu(term, state.selectedRoom);
-    //! get the messages
+
     askForRecentMessages(state.selectedRoom);
 
     if (name === "m") {
       state.chat = true;
       state.room = false;
+
       messagePrompt(term, state.selectedRoom, state.username, socket);
     }
 
@@ -250,7 +240,7 @@ term.on("key", (name, matches, data) => {
     if (name === "CTRL_R") {
       state.menu = true;
       state.room = false;
-      roomPrompt(term, state.roomOptions, state.userId, socket);
+      roomPrompt(term, state.roomOptions, state.user, socket);
     }
 
     // press escape function
@@ -258,15 +248,10 @@ term.on("key", (name, matches, data) => {
       mainMenu(term);
       state.menu = true;
       state.room = false;
+      // leave the room in socket server when user exits room menu
+      //socket.emit('leave', state.selectedRoom)
     }
   }
 });
 
-//* Make the terminal-kit override the normal terminal and listen for input so we can custom things with it */
-//! When terminal-kit overrides these inputs it needs to have a way to terminate.
-//? This override takes over the normal terminal and that it behaves different
-
 term.grabInput({ mouse: "button" });
-
-//?^ if you comment this out it will allow you to use the terminal normally and terminal-kit will not take over everything.
-//* BUT if we don't use it we will not have access to actually grabbing the inputs and doing things with it */
