@@ -26,8 +26,7 @@ const {
 const messagePrompt = require("./prompts/messagePrompt");
 const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
-const roomPrompt = require("./prompts/roomPrompt");
-const createRoomPrompt = require("./prompts/createRoomPrompt");
+
 
 
 // Socket handlers for the client
