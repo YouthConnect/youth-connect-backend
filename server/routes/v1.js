@@ -12,14 +12,16 @@ router.get("/", (req, res) => {
 
 router.param("model", (req, res, next) => {
   const modelName = req.params.model;
-
+console.log('model name', modelName);
   if (dataModules[modelName]) {
+    req.model = dataModules[modelName];
+
     //* If the model being searched for is the conflicted one set it to the right model */
-    if (modelName === "users") {
-      req.model = userModule;
-    } else {
-      req.model = dataModules[modelName];
-    }
+    // if (modelName === "users") {
+    //   req.model = userModule;
+    // } else {
+    //   req.model = dataModules[modelName];
+    // }
     next();
   } else {
     next("Invalid Model");

@@ -89,9 +89,9 @@ const adminMenu = (term) => {
   newLine(term);
   term.brightRed("LOGGED IN AS ADMIN");
   newLine(term);
-  term.blue('Please press "r" to view room controls');
+  term.blue('Please press "r" for admin room menu');
   newLine(term);
-  term.blue('Please press "u" to see all users connected');
+  term.blue('Please press "u" for admin users menu');
   newLine(term);
   term.blue("Please press ESCAPE to return to main menu");
   newLine(term);

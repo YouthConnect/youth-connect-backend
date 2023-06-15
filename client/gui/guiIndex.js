@@ -28,6 +28,7 @@ const usernamePrompt = require("./prompts/usernamePrompt");
 const passwordPrompt = require("./prompts/passwordPrompt");
 const roomPrompt = require("./prompts/roomPrompt");
 const createRoomPrompt = require("./prompts/createRoomPrompt");
+const createUserPrompt = require("./prompts/createUserPrompt");
 
 // Socket handlers for the client
 // socket.onAny((event, payload) => receivedMessage(event, payload, socket))
@@ -88,12 +89,28 @@ socket.on("IM HERE ADMINS", (payload) => {
   term.green(payload);
 });
 
+socket.on("CREATED USER", (payload) => {
+  socket.emit("CREATE USER", {
+    username: payload,
+    password: "password",
+    DOB: "01/01/2000",
+  });
+  state.menu = false;
+  state.adminUsersMenu= true;
+});
+
+
+
 socket.on("UPDATE YOUR USER", (payload) => {
   if (payload === "admin") {
     console.log("joining admins");
     socket.emit("join", "admins");
   }
   state.userId = payload.id;
+});
+
+socket.on("GET ALL USERS", (payload) => {
+console.log("GETTING USERS----", payload)
 });
 
 socket.on("UPDATE ROOM NAME", (payload) => {
@@ -172,11 +189,25 @@ term.on("key", (name, matches, data) => {
   }
 
   /*//? ------------------------------- ADMIN MENUS ------------------------------ */
- if (state.adminUsersMenu) {
+//create user
+  if (state.adminUsersMenu) {
   if (name === "c") {
+    state.adminUsersMenu = false;
+state.adminMenu = false;
+console.log("create user prompt----")
+createUserPrompt(term, socket);
+  }
+
+  //TODO view all users
+  if (name === "l") {
+    state.adminUsersMenu = false;
+state.adminMenu = false;
+console.log("view all users------")
+socket.emit("GET ALL USERS", {});
+ }
 
   }
- }
+
 if (state.adminRoomsMenu) {
   if (name === "c") {
     state.adminRoomsMenu = false;
@@ -184,6 +215,14 @@ state.adminMenu = false;
 console.log("create room prompt")
 createRoomPrompt(term, socket);
   }
+
+  //TODO view all rooms
+  if (name === "v") {
+    state.adminRoomsMenu = false;
+state.adminMenu = false;
+console.log("view all rooms-----")
+socket.emit("GET ALL ROOMS", {});
+}
 }
 
   if (state.adminMenu) {
