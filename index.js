@@ -16,9 +16,6 @@ const io = new Server(server);
 const axios = require("axios");
 const { db } = require("./server/models/index.js");
 
-var Filter = require("bad-words");
-const filter1 = new Filter();
-var filter2 = require("leo-profanity");
 
 const {
   relayMessage,
@@ -26,6 +23,8 @@ const {
   authenticate,
   verifyRoom,
   createRoom,
+  createUser,
+  getUsers,
   getRoomOptions,
   deleteRoom,
   updateRoom,
@@ -34,9 +33,6 @@ const {
 } = require("./socketHandlers/handlerIndex.js");
 
 const { Statement } = require("sqlite3");
-
-//?Update this later let roomOptions = await database.get("rooms")
-let roomOptions = ["Room1", "Room2", "Room3"];
 
 // TODO When the server starts create the rooms from the database
 
@@ -75,8 +71,24 @@ io.on("connection", (socket) => {
   socket.on("I AM HERE", (username) => {
     socket.to("admins").emit("IM HERE ADMINS", username);
   });
+  /* //?------------------------------ HANDLE USERS ------------------------------ */
+  // TODO Create a user
+  socket.on("CREATE USER", (payload) => {
+    //TODO - create a user in the database
+    let userInfo = createUser(payload, socket);
+    socket.emit("UPDATE YOUR USER", userInfo);
+
+  });
+
+  socket.on("GET ALL USERS", (payload) => {
+    let userInfo = getUsers(payload, socket);
+    socket.emit("ALL USERS", userInfo);
+  });
+
+
 
   /* //?------------------------------ HANDLE ROOMS ------------------------------ */
+  //! IF THIS ISN"T AWAITED AFTER MERGING PLEASE AWAIT IT
   socket.on("CREATE ROOM", (payload) => {
     //TODO - create a room in the database
     createRoom(payload, socket);
@@ -87,46 +99,49 @@ io.on("connection", (socket) => {
     socket.emit("UPDATED ROOMS", roomList);
   });
 
-  socket.on("GIVE ME UPDATED ROOMS", (payload) => {
-    //axios get request for all of the rooms in the database
-    // for now send hard coded rooms
-    //let roomList = getRoomOptions();
-    let roomList = roomOptions;
-    socket.emit("UPDATED ROOMS", roomList);
+  socket.on("GIVE ME UPDATED ROOMS", async (payload) => {
+    let roomList = await getRoomOptions();
+    socket.emit("UPDATED ROOMS", roomList.data);
   });
 
   // TODO handle join room event
 
-  socket.on("join", async (room, id) => {
-    //let roomList = getRoomOptions();
-    if (room === "admins") {
-      socket.join(room);
-    } else if (roomOptions.includes(room)) {
+  socket.on("join", async (payload) => {
+    // get roomList
+    // recentMessages
+    // [ [{...}, {... }], [{...}] ]
+    // roomList.data
+    // [ {..}, {..} ]
+    let roomList = await getRoomOptions();
+    let rooms = roomList.data;
+    // this returns and array, not an object
+    let room = rooms.filter(room => room.name === payload.room)
+    let currentRoom = room[0];
+
+    let today = new Date();
+    let age = today.getFullYear() - parseInt(payload.user.DOB.split("/"));
+
+    if (payload.room === "admins") {
+      socket.join(payload.room);
+    } else {
       // check if they have permission join
 
-      let user = await axios.get(`http://localhost:3001/api/v1/users/${id}`);
-      let today = new Date();
-      console.log(today.getFullYear(), user.DOB, parseInt(user.DOB.split("/")));
-      let age = today.getFullYear() - parseInt(user.DOB.split("/")[2]);
-      console.log(today, age);
-
-      if (age > 5) {
+      if (age > currentRoom.minimumAge && age < currentRoom.maxAge || payload.user.username === 'admin' ) {
         console.log("You can enter this room");
-        socket.emit("UPDATE CURRENT ROOM", room);
-        socket.join(room);
-        console.log(`${socket.id} joined the ${room} room.`);
+        socket.emit("UPDATE CURRENT ROOM", payload.room);
+        socket.join(payload.room);
+        console.log(`${socket.id} joined the ${payload.room} room.`);
       } else {
         console.log("you cant enter");
+        socket.emit("GO TO MENU", {})
       }
-      // axios.get(userPermsions)? to verify user can join room or the user will have a boolean that says so
-      // update the client state with the room name
-
-      // they join
-    } else {
-      console.log(`${socket.id} tried to join an invalid room: ${room}`);
     }
-    // update the user
   });
+
+  // when user leaves a room leave it
+  socket.on('leave', payload => {
+    socket.leave(payload)
+  })
 
   // TODO add a user to a room
   socket.on("ADD USER TO ROOM", (payload) => {
@@ -183,11 +198,14 @@ io.on("connection", (socket) => {
 
   // handle giving the recent messages to the client
   socket.on("GET RECENT MESSAGES", (payload) => {
-    // let messagesFromRoom = await axios.get('v1/messages/from/${payload.room}')
-    // payload = "Room1"
+    let messagePayload
+    if(!recentMessages[`${payload}RecentMessages`]){
+      messagePayload = [];
+    } else { messagePayload = recentMessages[`${payload}RecentMessages`] }
+
     socket.emit(
       "SENDING RECENT MESSAGES",
-      recentMessages[`${payload}RecentMessages`]
+      messagePayload
     ); //Room1RecentMessages
   });
 
@@ -206,9 +224,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("HERES MY CREDENTIALS", (payload) => {
-    //TODO transform this to use await axios.post('/signin') and handle that
-    // let user = await axios.get('/signin', {payload.userInfo})
-    // authenticate(user)
     authenticate(payload, socket);
   });
 });

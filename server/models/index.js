@@ -2,7 +2,7 @@
 
 const { Sequelize, DataTypes } = require("sequelize");
 
-const userModel = require("./users.js");
+const userModel = require("../auth/models/users.js");
 const roomModel = require("./rooms/model.js");
 const messageModel = require("./messages/model.js");
 const Collection = require("./data-collection.js");
@@ -19,9 +19,9 @@ module.exports = {
   // ? The  V routes are built to use collections for rooms and messages
 
   messages: new Collection(messages),
-  userModule: new Collection(users),
+  users: new Collection(users),
   rooms: new Collection(rooms),
   roomsModule: rooms,
   // ? Auth route is made to use raw models
-  users, //* Use both */
+  userModule:users, //* Use both */
 };

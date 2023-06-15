@@ -2,23 +2,43 @@
 
 const { newLine } = require("../client/gui/lib");
 const axios = require("axios");
+const base64 = require('base-64');
+
+const Filter = require("bad-words");
+const filter1 = new Filter();
+const filter2 = require("leo-profanity");
+const { DataTypes } = require("sequelize");
+
 
 const changeState = (payload, socket, recentMessages) => {
   socket.emit("CHANGE STATE", payload);
 };
 
-const authenticate = (user, socket) => {
+const authenticate = async (user, socket) => {
   console.log("authenticated", user.username, user.password);
+  //base64 encode the data in format '${user}:${pass}'
+  let formattedData = base64.encode(`${user.username}:${user.password}`);
+  // send properly formated data to signin route //* in the authorization header as `Basic ${formatedData}`*/
+  let validatedUser = await axios.post('http://localhost:3001/signin', {}, { headers: { Authorization: `Basic ${formattedData}` } });
+
+  //return the validated user through socket
 
   //? return the authenticated users's info (includes their token)
-  socket.emit("UPDATE YOUR USER", { username: user.username, id: 1 }); //! HARD CODED TEMP
+  socket.emit("UPDATE YOUR USER", validatedUser.data.user);
 };
 
 // HANDLE MESSAGES ON THE SERVER SIDE
-const message = async (payload, socket) => {
+const message = async (payload, socket, recentMessages) => {
   if (payload.text !== "") {
     try {
+
       const currentRoomMessages = `${payload.room}RecentMessages`;
+  //recentMessages[whatever we wnated it to be] = what we wantit to equal
+      //if the message (room specific) queue doesn't exist create it
+      if (!recentMessages[currentRoomMessages]) {
+        recentMessages[currentRoomMessages] = []
+      }
+
 
       let cleanWords1 = filter1.clean(payload.text);
       let cleanWords2 = filter2.clean(cleanWords1);
@@ -73,16 +93,6 @@ const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
   term.blue(`${payload.username}:`, payload.text);
 };
 
-// This ONLY tells the server i received a message. thats it.
-const receivedMessage = (payload, socket) => {
-  socket.emit("RECEIVED MESSAGE", payload);
-};
-
-const relayMessage = (payload, socket) => {
-  // relay the message to everyone BUT THE SENDER
-  socket.broadcast.emit("RELAY MESSAGE", payload);
-};
-
 const createRoom = async (payload, socket) => {
   let createdRoom = await axios.post(`http://localhost:3001/api/v2/rooms`, {
     name: payload.room,
@@ -95,7 +105,7 @@ const createRoom = async (payload, socket) => {
 };
 
 const getRoomOptions = async () => {
-  let roomList = await axios.get("http://localhost:3001/api/v2/rooms");
+  let roomList = await axios.get("http://localhost:3001/api/v1/rooms");
   return roomList;
 };
 
@@ -134,15 +144,38 @@ const deleteUserInRoom = (usersInRoom, user) => {
   return updatedUsers;
 };
 
+const createUser = async (payload, socket) => {
+  let createdUser = await axios.post(
+    `http://localhost:3001/api/v2/users`,
+    {
+    username: payload.username,
+    password: payload.password,
+    DOB: payload.DOB,
+    }
+  );
+  socket.emit("CREATED USER", createdUser);
+  console.log("THIS IS THE CREATED USER------------", createdUser);
+  return createdUser;
+};
+
+const getUsers = async (payload, socket) => {
+let getAllUsers = await axios.get(
+  `http://localhost:3001/api/v1/users`,
+);
+socket.emit("GET ALL USERS", getAllUsers.data);
+console.log("THIS IS ALL USERS------", getAllUsers.data);
+return getAllUsers.data;
+};
+
+
 module.exports = {
   sendMessage,
   changeState,
-  receiveMessage,
-  receivedMessage,
-  relayMessage,
   authenticate,
   message,
   createRoom,
+  createUser,
+  getUsers,
   getRoomOptions,
   deleteRoom,
   updateRoom,
