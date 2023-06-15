@@ -7,6 +7,8 @@ const base64 = require('base-64');
 const Filter = require("bad-words");
 const filter1 = new Filter();
 const filter2 = require("leo-profanity");
+const { DataTypes } = require("sequelize");
+
 
 const changeState = (payload, socket, recentMessages) => {
   socket.emit("CHANGE STATE", payload);
@@ -142,12 +144,38 @@ const deleteUserInRoom = (usersInRoom, user) => {
   return updatedUsers;
 };
 
+const createUser = async (payload, socket) => {
+  let createdUser = await axios.post(
+    `http://localhost:3001/api/v2/users`,
+    {
+    username: payload.username,
+    password: payload.password,
+    DOB: payload.DOB,
+    }
+  );
+  socket.emit("CREATED USER", createdUser);
+  console.log("THIS IS THE CREATED USER------------", createdUser);
+  return createdUser;
+};
+
+const getUsers = async (payload, socket) => {
+let getAllUsers = await axios.get(
+  `http://localhost:3001/api/v1/users`,
+);
+socket.emit("GET ALL USERS", getAllUsers.data);
+console.log("THIS IS ALL USERS------", getAllUsers.data);
+return getAllUsers.data;
+};
+
+
 module.exports = {
   sendMessage,
   changeState,
   authenticate,
   message,
   createRoom,
+  createUser,
+  getUsers,
   getRoomOptions,
   deleteRoom,
   updateRoom,

@@ -19,9 +19,9 @@ module.exports = {
   // ? The  V routes are built to use collections for rooms and messages
 
   messages: new Collection(messages),
-  userModule: new Collection(users),
+  users: new Collection(users),
   rooms: new Collection(rooms),
   roomsModule: rooms,
   // ? Auth route is made to use raw models
-  users, //* Use both */
+  userModule:users, //* Use both */
 };
