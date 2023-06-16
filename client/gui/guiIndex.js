@@ -1,15 +1,16 @@
+require("dotenv").config();
+const PORT = process.env.PORT;
+const BACKEND_URL = process.env.BACKEND_URL
 //? Create a terminal interface that uses functions and sockets to manage its state (menu, prompting, sending and receiving data etc)
 // create the terminal instance
 const term = require("terminal-kit").terminal;
 // create a socket client and give it functions
 //? Client socket hub
 const { io } = require("socket.io-client");
-const socket = io("http://localhost:3001");
+const socket = io(`http://localhost:3001`);
 
 //? require functions from the socket client lib that contains basic handlers for our socket client
-const {
-  changeState,
-} = require("../../socketHandlers/handlerIndex");
+const { changeState } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
 const {
@@ -52,12 +53,16 @@ socket.on("UPDATE PASSWORD", (payload) => {
   socket.emit("VERIFY USER", {});
 });
 
-socket.on("GO TO MENU", payload => {
-  state.selectedRoom = '';
+socket.on("GO TO MENU", (payload) => {
+  state.selectedRoom = "";
   state.room = false;
+  state.adminRoomsMenu = false;
+  state.adminMenu = false;
+  state.adminUsersMenu = false;
+  state.chat = false;
   state.menu = true;
-  term.red('You cannot enter that room')
-})
+  term.red("--");
+});
 
 socket.on("UPDATE CURRENT ROOM", (payload) => {
   if (payload !== "admins") {
@@ -68,6 +73,7 @@ socket.on("UPDATE CURRENT ROOM", (payload) => {
 });
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
+  console.log(state.username, state.password);
   socket.emit("HERES MY CREDENTIALS", {
     username: state.username,
     password: state.password,
@@ -76,17 +82,15 @@ socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
 });
 
 socket.on("SENDING RECENT MESSAGES", (payload) => {
-
   if (state.room) {
     roomMenu(term);
     payload.forEach((message) => {
-      if (message.username === 'admin') {
-        term.green(`\n\t${message.username}: ${message.text}`)
+      if (message.username === "admin") {
+        term.green(`\n\t${message.username}: ${message.text}`);
       } else {
-        term.blue(`\n\t${message.username}: ${message.text}`)
+        term.blue(`\n\t${message.username}: ${message.text}`);
       }
-    }
-    );
+    });
   }
 }); // payload = [message1, message2, ....]
 
@@ -105,35 +109,43 @@ socket.on("CREATED USER", (payload) => {
     DOB: "01/01/2000",
   });
   state.menu = false;
-  state.adminUsersMenu= true;
+  state.adminUsersMenu = true;
 });
-
-
 
 socket.on("UPDATE YOUR USER", (payload) => {
   if (payload.username === "admin") {
     term.red("\nyou are an admin");
-    socket.emit("join", { user: payload, room: 'admins' });
+    socket.emit("join", { user: payload, room: "admins" });
   }
   // Very first time we set user when they log in
   state.user = payload;
-
 });
 
 socket.on("GET ALL USERS", (payload) => {
-console.log("GETTING USERS----", payload)
+  console.log("GETTING USERS----", payload);
 });
 
 socket.on("UPDATE ROOM NAME", (payload) => {
   socket.emit("CREATE ROOM", {
     name: payload,
-    users:null,
     description: `MAIN ROOM ${payload}`,
     minimumAge: 12,
     maxAge: 99,
   });
   state.menu = false;
-  state.adminRoomsMenu= true;
+  state.adminRoomsMenu = true;
+});
+
+socket.on("UPDATE USER NAME", (payload) => {
+  socket.emit("CREATE ROOM", {
+    name: payload,
+    users: null,
+    description: `MAIN ROOM ${payload}`,
+    minimumAge: 12,
+    maxAge: 99,
+  });
+  state.menu = false;
+  state.adminRoomsMenu = true;
 });
 
 //ask server for all users connected
@@ -147,9 +159,9 @@ const askForConnectedUsers = () => {
 
 const leaveRoom = () => {
   term(`You have left: ${state.selectedRoom}`);
-  socket.emit('leave', state.selectedRoom ? state.selectedRoom : '')
-  state.selectedRoom = '';
-}
+  socket.emit("leave", state.selectedRoom ? state.selectedRoom : "");
+  state.selectedRoom = "";
+};
 
 //ask server to give us the most recent messages
 const askForRecentMessages = () => {
@@ -179,14 +191,11 @@ askForUpdatedRooms();
 
 // get mouse clicks and scroll wheel
 term.on("mouse", (name, matches, data) => {
-
   if (name === "MOUSE_RIGHT_BUTTON_PRESSED") {
-
   }
 });
 
 term.on("key", (name, matches, data) => {
-
   if (name === "END" || name === "CTRL_C") {
     terminate(term);
   }
@@ -197,41 +206,46 @@ term.on("key", (name, matches, data) => {
   }
 
   /*//? ------------------------------- ADMIN MENUS ------------------------------ */
-//create user
+  //create user
   if (state.adminUsersMenu) {
-  if (name === "c") {
-    state.adminUsersMenu = false;
-state.adminMenu = false;
-console.log("create user prompt----")
-createUserPrompt(term, socket);
+    if (name === "c") {
+      state.adminUsersMenu = false;
+      state.adminMenu = false;
+      console.log("create user prompt----");
+      createUserPrompt(term, socket);
+    }
+
+    //TODO view all users
+    if (name === "l") {
+      state.adminUsersMenu = false;
+      state.adminMenu = false;
+      console.log("view all users------");
+      socket.emit("GET ALL USERS", {});
+    }
   }
 
-  //TODO view all users
-  if (name === "l") {
-    state.adminUsersMenu = false;
-state.adminMenu = false;
-console.log("view all users------")
-socket.emit("GET ALL USERS", {});
- }
+  if (state.adminRoomsMenu) {
+    if (name === "c") {
+      state.adminRoomsMenu = false;
+      state.adminMenu = false;
+      console.log("create room prompt");
+      createRoomPrompt(term, socket);
+    }
 
+    //TODO view all rooms
+    if (name === "v") {
+      state.adminRoomsMenu = false;
+      state.adminMenu = false;
+      console.log("view all rooms-----");
+      socket.emit("GET ALL ROOMS", {});
+    }
+
+    if (name === "o") {
+      state.adminRoomsMenu = false;
+      state.room = true;
+      roomPrompt(term, state.roomOptions, state.user, socket); //potentially change to just view room?
+    }
   }
-
-if (state.adminRoomsMenu) {
-  if (name === "c") {
-    state.adminRoomsMenu = false;
-state.adminMenu = false;
-console.log("create room prompt")
-createRoomPrompt(term, socket);
-  }
-
-  //TODO view all rooms
-  if (name === "v") {
-    state.adminRoomsMenu = false;
-state.adminMenu = false;
-console.log("view all rooms-----")
-socket.emit("GET ALL ROOMS", {});
-}
-}
 
   if (state.adminMenu) {
     adminMenu(term);
@@ -243,70 +257,79 @@ socket.emit("GET ALL ROOMS", {});
       console.log("admin rooms menu");
       // roomPrompt(term, state.roomOptions, socket);
     }
+
     //view the state
     if (name === "v") {
       // no need to change state here
       term.blue(JSON.stringify(state));
-
     }
 
-    if (name === 'u') {
+    if (name === "u") {
       askForConnectedUsers();
     }
 
 
 
-  }
+    //view the state
+    if (name === "v") {
+      // no need to change state here
+      term.blue(JSON.stringify(state));
+      askForConnectedUsers();
+    }
 
+    if (name === "ESCAPE") {
+      mainMenu(term);
+      state.adminMenu = false;
+      state.menu = true;
+    }
+    if (state.adminUsersMenu) {
+      // if they are in admin room menu
+      adminUsersMenu(term);
+    }
 
-
+    if (state.adminRoomsMenu) {
+      // if they are in admin room menu
+      adminRoomsMenu(term);
+    }
   }
-
-  if (name === "ESCAPE") {
-    mainMenu(term);
-    state.adminMenu = false;
-    state.menu = true;
-  }
-  if (state.adminUsersMenu) {
-    // if they are in admin room menu
-    adminUsersMenu(term);
-  }
-
-  if (state.adminRoomsMenu) {
-    // if they are in admin room menu
-    adminRoomsMenu(term);
-  }
-
-  if (name === "o") {
-    state.adminRoomsMenu = false;
-    state.room = true;
-    roomPrompt(term, state.roomOptions, state.userId, socket); //potentially change to just view room?
-  }
-}
 
   /*//? ------------------------------- NORMAL MENUS ------------------------------ */
   // Only grab these letters if the user is not in a prompt.
   if (state.menu) {
-  mainMenu(term);
+    mainMenu(term);
 
-  if (state.username === "admin") {
-    if (name === "a") {
-      // if the admin is logged in, and then they press the 'secret key' then show the admin menu
-      state.adminMenu = true;
+    if (state.username === "admin") {
+      if (name === "a") {
+        // if the admin is logged in, and then they press the 'secret key' then show the admin menu
+        state.adminMenu = true;
+        state.menu = false;
+        //usernamePrompt(term, socket);
+      }
+    }
+
+    // if in menu and press r
+    if (name === "r") {
+      // update the state so the functions work correctly
       state.menu = false;
       state.room = true;
       //console.log(state.roomOptions)
       roomPrompt(term, state.roomOptions, state.user, socket);
     }
+
+    if (name === "l") {
+      state.chat = true;
+      state.menu = false;
+      usernamePrompt(term, socket);
+    }
   }
 
-  if (name === "l") {
-    state.chat = true;
-    state.menu = false;
-    usernamePrompt(term, socket);
+  if (state.chat) {
+    if (name === "ESCAPE") {
+      roomMenu(term, state.selectedRoom);
+      state.chat = false;
+      state.room = true;
+    }
   }
-
-
   if (state.room) {
     // pass term to use it, and room name to print the room name
     roomMenu(term, state.selectedRoom);
@@ -333,28 +356,9 @@ socket.emit("GET ALL ROOMS", {});
       state.menu = true;
       state.room = false;
       // leave the room in socket server when user exits room menu
-      leaveRoom()
+      leaveRoom();
     }
-  // if in menu and press r
-  if (name === "r") {
-    // update the state so the functions work correctly
-    state.menu = false;
-    state.room = true;
-    //console.log(state.roomOptions)
-    roomPrompt(term, state.roomOptions, state.userId, socket);
   }
-}
-
-if (state.chat) {
-  if (name === "ESCAPE") {
-    roomMenu(term, state.selectedRoom);
-    state.chat = false;
-    state.room = true;
-  }
-}
-
-  }
-}
 });
 
 term.grabInput({ mouse: "button" });

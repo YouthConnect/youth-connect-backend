@@ -2,11 +2,7 @@
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dataModules = require("../../models/index.js");
-console.log(dataModules);
-const { rooms } = require("../../models/index.js");
-const roomModuleGOOD = rooms;
-console.log(rooms);
+
 const axios = require("axios");
 
 const SECRET = process.env.SECRET || "secretstring";
@@ -56,9 +52,11 @@ const userModel = (sequelize, DataTypes) => {
   });
 
   model.authenticateBasic = async function (username, password) {
+    console.log(username, password)
     const user = await this.findOne({ where: { username } });
     const valid = await bcrypt.compare(password, user.password);
     if (valid) {
+      console.log('VALID USER')
       return user;
     }
     throw new Error("Invalid User");

@@ -3,6 +3,9 @@
 const { newLine } = require("../client/gui/lib");
 const axios = require("axios");
 const base64 = require('base-64');
+require("dotenv").config();
+const PORT = process.env.PORT;
+const BACKEND_URL = process.env.BACKEND_URL
 
 const Filter = require("bad-words");
 const filter1 = new Filter();
@@ -15,16 +18,17 @@ const changeState = (payload, socket, recentMessages) => {
 };
 
 const authenticate = async (user, socket) => {
-  console.log("authenticated", user.username, user.password);
+  try {
   //base64 encode the data in format '${user}:${pass}'
   let formattedData = base64.encode(`${user.username}:${user.password}`);
   // send properly formated data to signin route //* in the authorization header as `Basic ${formatedData}`*/
-  let validatedUser = await axios.post('http://localhost:3001/signin', {}, { headers: { Authorization: `Basic ${formattedData}` } });
-
-  //return the validated user through socket
+    let validatedUser = await axios.post(`${BACKEND_URL}/signin`, {}, { headers: { Authorization: `Basic ${formattedData}` } });
 
   //? return the authenticated users's info (includes their token)
   socket.emit("UPDATE YOUR USER", validatedUser.data.user);
+  } catch( error) {
+    console.log(error.message)
+  }
 };
 
 // HANDLE MESSAGES ON THE SERVER SIDE
@@ -67,7 +71,7 @@ const message = async (payload, socket, recentMessages) => {
 
       //* Then send it to database */
       let createdMessage = await axios.post(
-        `http://localhost:3001/api/v1/messages`,
+        `${BACKEND_URL}/api/v1/messages`,
         {
           text: cleanWords2,
           room: payload.room,
@@ -94,31 +98,31 @@ const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
 };
 
 const createRoom = async (payload, socket) => {
-  let createdRoom = await axios.post(`http://localhost:3001/api/v2/rooms`, {
-    name: payload.room,
+  let createdRoom = await axios.post(`${BACKEND_URL}/api/v1/rooms`, {
+    name: payload.name,
     users: payload.users,
     description: payload.description,
     minimumAge: payload.minimumAge,
     maxAge: payload.maxAge,
   });
-  socket.emit("CREATED ROOM", createdRoom);
+  socket.emit("CREATED ROOM", createdRoom.data);
 };
 
 const getRoomOptions = async () => {
-  let roomList = await axios.get("http://localhost:3001/api/v1/rooms");
+  let roomList = await axios.get(`${BACKEND_URL}/api/v1/rooms`);
   return roomList;
 };
 
 const deleteRoom = async (payload, socket) => {
   let deletedRoom = await axios.delete(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`
+    `${BACKEND_URL}/api/v2/rooms/${payload.room}`
   );
   socket.emit("DELETED ROOM", deletedRoom);
 };
 
 const updateRoom = async (payload, socket) => {
   let updatedRoom = await axios.put(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`,
+    `${BACKEND_URL}/api/v1/rooms/${payload.room}`,
     {
       name: payload.room,
       users: payload.users,
@@ -132,7 +136,7 @@ const updateRoom = async (payload, socket) => {
 
 const getRoomUsers = async (payload, socket) => {
   let roomUsers = await axios.get(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`
+    `${BACKEND_URL}/api/v2/rooms/${payload.room}`
   );
   socket.emit("GOT ROOM USERS", roomUsers);
   console.log("THIS IS THE ROOM INFORMATION", roomUsers);
@@ -146,7 +150,7 @@ const deleteUserInRoom = (usersInRoom, user) => {
 
 const createUser = async (payload, socket) => {
   let createdUser = await axios.post(
-    `http://localhost:3001/api/v2/users`,
+    `${BACKEND_URL}/api/v1/users`,
     {
     username: payload.username,
     password: payload.password,
@@ -160,7 +164,7 @@ const createUser = async (payload, socket) => {
 
 const getUsers = async (payload, socket) => {
 let getAllUsers = await axios.get(
-  `http://localhost:3001/api/v1/users`,
+  `${BACKEND_URL}/api/v1/users`,
 );
 socket.emit("GET ALL USERS", getAllUsers.data);
 console.log("THIS IS ALL USERS------", getAllUsers.data);

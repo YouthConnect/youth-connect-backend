@@ -3,14 +3,14 @@
 const express = require("express");
 const authRouter = express.Router();
 
-const { users } = require("../models");
+const { userModule } = require("../models/index.js");
 const basicAuth = require("./middleware/basic.js");
 const bearerAuth = require("./middleware/bearer.js");
 const permissions = require("./middleware/acl.js");
 
 authRouter.post("/signup", async (req, res, next) => {
   try {
-    let userRecord = await users.create(req.body);
+    let userRecord = await userModule.create(req.body);
     const output = {
       user: userRecord,
       token: userRecord.token,
@@ -34,7 +34,7 @@ authRouter.get(
   bearerAuth,
   permissions("delete"),
   async (req, res, next) => {
-    const userRecords = await users.findAll({});
+    const userRecords = await userModule.findAll({});
     const list = userRecords.map((user) => user.username);
     res.status(200).json(list);
   }
