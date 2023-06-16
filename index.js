@@ -16,7 +16,6 @@ const io = new Server(server);
 const axios = require("axios");
 const { db } = require("./server/models/index.js");
 
-
 const {
   relayMessage,
   message,
@@ -38,9 +37,7 @@ const { Statement } = require("sqlite3");
 
 // await axios.get(/rooms/room1/last10)
 //create a feed of only the most recent messages from the database in real time
-let recentMessages = {
-
-};
+let recentMessages = {};
 
 //pass in the socket(that connected/made a request) to each of these functions
 io.on("connection", (socket) => {
@@ -62,15 +59,12 @@ io.on("connection", (socket) => {
     //TODO - create a user in the database
     let userInfo = createUser(payload, socket);
     socket.emit("UPDATE YOUR USER", userInfo);
-
   });
 
   socket.on("GET ALL USERS", (payload) => {
     let userInfo = getUsers(payload, socket);
     socket.emit("ALL USERS", userInfo);
   });
-
-
 
   /* //?------------------------------ HANDLE ROOMS ------------------------------ */
 
@@ -92,11 +86,10 @@ io.on("connection", (socket) => {
   // TODO handle join room event
 
   socket.on("join", async (payload) => {
-
     let roomList = await getRoomOptions();
     let rooms = roomList.data;
     // this returns and array, not an object
-    let room = rooms.filter(room => room.name === payload.room)
+    let room = rooms.filter((room) => room.name === payload.room);
     let currentRoom = room[0];
 
     let today = new Date();
@@ -107,22 +100,25 @@ io.on("connection", (socket) => {
     } else {
       // check if they have permission join
 
-      if (age > currentRoom.minimumAge && age < currentRoom.maxAge || payload.user.username === 'admin' ) {
+      if (
+        (age > currentRoom.minimumAge && age < currentRoom.maxAge) ||
+        payload.user.username === "admin"
+      ) {
         console.log("You can enter this room");
         socket.emit("UPDATE CURRENT ROOM", payload.room);
         socket.join(payload.room);
         console.log(`${socket.id} joined the ${payload.room} room.`);
       } else {
         console.log("you cant enter");
-        socket.emit("GO TO MENU", {})
+        socket.emit("GO TO MENU", {});
       }
     }
   });
 
   // when user leaves a room leave it
-  socket.on('leave', payload => {
-    socket.leave(payload)
-  })
+  socket.on("leave", (payload) => {
+    socket.leave(payload);
+  });
 
   // TODO add a user to a room
   socket.on("ADD USER TO ROOM", (payload) => {
@@ -154,14 +150,13 @@ io.on("connection", (socket) => {
     socket.emit("UPDATED ROOM OPTIONS", newRoomOptions);
   });
 
-  socket.on("UPDATE ROOM NAME", payload => {
-   socket.emit("UPDATE ROOM NAME", payload)
-  })
+  socket.on("UPDATE ROOM NAME", (payload) => {
+    socket.emit("UPDATE ROOM NAME", payload);
+  });
 
-   socket.on("UPDATE USER NAME", payload => {
-
-    socket.emit("UPDATE USER NAME", payload)
-  })
+  socket.on("UPDATE USER NAME", (payload) => {
+    socket.emit("UPDATE USER NAME", payload);
+  });
 
   //TODO - handle leave room event
   socket.on("LEAVE ROOM", (payload) => {
@@ -188,15 +183,14 @@ io.on("connection", (socket) => {
 
   // handle giving the recent messages to the client
   socket.on("GET RECENT MESSAGES", (payload) => {
-    let messagePayload
-    if(!recentMessages[`${payload}RecentMessages`]){
+    let messagePayload;
+    if (!recentMessages[`${payload}RecentMessages`]) {
       messagePayload = [];
-    } else { messagePayload = recentMessages[`${payload}RecentMessages`] }
+    } else {
+      messagePayload = recentMessages[`${payload}RecentMessages`];
+    }
 
-    socket.emit(
-      "SENDING RECENT MESSAGES",
-      messagePayload
-    ); //Room1RecentMessages
+    socket.emit("SENDING RECENT MESSAGES", messagePayload); //Room1RecentMessages
   });
 
   /* //?------------------------------- USER LOGIN ------------------------------- */
@@ -214,7 +208,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("HERES MY CREDENTIALS", (payload) => {
-    console.log(payload)
+    console.log(payload);
     authenticate(payload, socket);
   });
 });

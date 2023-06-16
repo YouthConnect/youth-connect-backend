@@ -6,7 +6,7 @@ const supertest = require("supertest");
 const base64 = require("base-64");
 
 const app = require("../server/server.js");
-const server = require('../index.js')
+const server = require("../index.js");
 const { db } = require("../server/models/index");
 
 const permissions = require("../server/auth/middleware/acl");
@@ -15,17 +15,30 @@ const bearer = require("../server/auth/middleware/bearer");
 const { expect } = require("@jest/globals");
 
 beforeAll(async () => {
-  await db.sync();
+  try {
+    await db.sync();
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 afterAll(async () => {
-  await db.drop();
+  try {
+    await db.drop();
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 let userData = {
   testUser: { username: "user", password: "password", DOB: "01/10/2020" },
-  testUser2: { username: "user", password: "password", DOB: "01/10/1980" },
-  testAdmin: { username: "admin", password: "admin", DOB: "01/10/1980", role: "admin" },
+  testUser2: { username: "user2", password: "password", DOB: "01/10/1980" },
+  testAdmin: {
+    username: "admin",
+    password: "admin",
+    DOB: "01/10/1980",
+    role: "admin",
+  },
 };
 
 let badAccessToken = null;
@@ -36,7 +49,7 @@ const request = supertest(server);
 describe("Server", () => {
   it("runs", async () => {
     const response = await request.get("/");
-
+    console.log(response);
     expect(response.status).toEqual(200);
     expect(response.text).toEqual("Home route!");
   });
@@ -47,7 +60,9 @@ describe("Server", () => {
 
   it("creates new users", async () => {
     const response = await request.post("/signup").send(userData.testAdmin);
-    const user2 = await request.post("/signup").send(userData.testUser);
+    const user = await request.post("/signup").send(userData.testUser);
+    const user2 = await request.post("/signup").send(userData.testUser2);
+    console.log(response, user, user2);
 
     // set the good access token for future use
     goodAccessToken = response.body.token;
@@ -55,7 +70,7 @@ describe("Server", () => {
     expect(response.status).toEqual(201);
     expect(response.body.user).toBeDefined();
     expect(response.body.token).toBeDefined();
-    expect(user2.body.user.username).toEqual("user");
+    expect(user1.body.user.username).toEqual("user");
   });
 
   it("signs in old users", async () => {
@@ -73,16 +88,32 @@ describe("Server", () => {
   //* */
 
   it("handles POST to v1", async () => {
-    const response = await request
-      .post("/api/v1/rooms")
-      .send({ name: "teens", description: "teens only", minimumAge: 12, maxAge: 17 });
-    const room2 = await request
-      .post("/api/v1/rooms")
-      .send({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
+    const response = await request.post("/api/v1/rooms").send({
+      name: "teens",
+      description: "teens only",
+      minimumAge: 12,
+      maxAge: 17,
+    });
+    const room2 = await request.post("/api/v1/rooms").send({
+      name: "adults",
+      description: "adults only",
+      minimumAge: 18,
+      maxAge: 100,
+    });
 
     expect(response.status).toEqual(201);
-    expect(response.body).toMatchObject({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
-    expect(room2.body).toMatchObject({ name: "adults", description: "adults only", minimumAge: 18, maxAge: 100 });
+    expect(response.body).toMatchObject({
+      name: "adults",
+      description: "adults only",
+      minimumAge: 18,
+      maxAge: 100,
+    });
+    expect(room2.body).toMatchObject({
+      name: "adults",
+      description: "adults only",
+      minimumAge: 18,
+      maxAge: 100,
+    });
   });
 
   it("handles GET all from v1", async () => {
@@ -96,7 +127,12 @@ describe("Server", () => {
 
     expect(response.status).toEqual(200);
     expect(response.body.length).toBeUndefined();
-    expect(response.body).toMatchObject({ name: "teens", description: "teens only", minimumAge: 12, maxAge: 17 });
+    expect(response.body).toMatchObject({
+      name: "teens",
+      description: "teens only",
+      minimumAge: 12,
+      maxAge: 17,
+    });
   });
 
   it("handles UPDATE to v1", async () => {
@@ -105,7 +141,12 @@ describe("Server", () => {
       .send({ name: "pants" });
 
     expect(response.status).toEqual(200);
-    expect(response.body).toMatchObject({ name: "pants", description: "teens only", minimumAge: 12, maxAge: 17 });
+    expect(response.body).toMatchObject({
+      name: "pants",
+      description: "teens only",
+      minimumAge: 12,
+      maxAge: 17,
+    });
   });
 
   it("handles BAD UPDATE to v1", async () => {
@@ -119,9 +160,12 @@ describe("Server", () => {
   });
 
   it("handles DELETE to to v1", async () => {
-    const createIt = await request
-      .post("/api/v1/clothes")
-      .send({ name: "something", description: "something", minimumAge: 12, maxAge: 17 });
+    const createIt = await request.post("/api/v1/clothes").send({
+      name: "something",
+      description: "something",
+      minimumAge: 12,
+      maxAge: 17,
+    });
 
     const deleteIt = await request.delete("/api/v1/clothes/4");
 
@@ -142,15 +186,35 @@ describe("Server", () => {
     const response = await request
       .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "kids", description: "kids only", minimumAge: 6, maxAge: 12 });
+      .send({
+        name: "kids",
+        description: "kids only",
+        minimumAge: 6,
+        maxAge: 12,
+      });
     const rooms2 = await request
       .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
+      .send({
+        name: "adults2",
+        description: "adults only again",
+        minimumAge: 18,
+        maxAge: 100,
+      });
 
     expect(response.status).toEqual(201);
-    expect(response.body).toMatchObject({ name: "kids", description: "kids only", minimumAge: 6, maxAge: 12 });
-    expect(rooms2.body).toMatchObject({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
+    expect(response.body).toMatchObject({
+      name: "kids",
+      description: "kids only",
+      minimumAge: 6,
+      maxAge: 12,
+    });
+    expect(rooms2.body).toMatchObject({
+      name: "adults2",
+      description: "adults only again",
+      minimumAge: 18,
+      maxAge: 100,
+    });
   });
 
   it("handles GET all from v2", async () => {
@@ -167,7 +231,12 @@ describe("Server", () => {
       .set("Authorization", `Bearer ${goodAccessToken}`);
 
     expect(response.status).toEqual(200);
-    expect(response.body).toMatchObject({ name: "adults2", description: "adults only again", minimumAge: 18, maxAge: 100 });
+    expect(response.body).toMatchObject({
+      name: "adults2",
+      description: "adults only again",
+      minimumAge: 18,
+      maxAge: 100,
+    });
   });
 
   it("handles UPDATE to v2", async () => {
@@ -179,7 +248,7 @@ describe("Server", () => {
     expect(response.status).toEqual(200);
     expect(response.body).toMatchObject({
       name: "hat",
-      description: "do you like hats?"
+      description: "do you like hats?",
     });
   });
 
@@ -187,7 +256,7 @@ describe("Server", () => {
     const response = await request
       .put("/api/v2/rooms/8")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "adults5", description: "adults again??"});
+      .send({ name: "adults5", description: "adults again??" });
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual("That item could not be updated.");
@@ -197,7 +266,12 @@ describe("Server", () => {
     const createIt = await request
       .post("/api/v2/rooms")
       .set("Authorization", `Bearer ${goodAccessToken}`)
-      .send({ name: "adults5", description: "adults over and over", minimumAge: 18, maxAge: 100 });
+      .send({
+        name: "adults5",
+        description: "adults over and over",
+        minimumAge: 18,
+        maxAge: 100,
+      });
 
     const deleteIt = await request
       .delete("/api/v2/rooms/7")

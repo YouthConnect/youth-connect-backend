@@ -7,9 +7,7 @@ const { io } = require("socket.io-client");
 const socket = io("http://localhost:3001");
 
 //? require functions from the socket client lib that contains basic handlers for our socket client
-const {
-  changeState,
-} = require("../../socketHandlers/handlerIndex");
+const { changeState } = require("../../socketHandlers/handlerIndex");
 
 // require functions from custom terminal lib that contains our basic functions for working with the terminal-kit
 const {
@@ -52,16 +50,16 @@ socket.on("UPDATE PASSWORD", (payload) => {
   socket.emit("VERIFY USER", {});
 });
 
-socket.on("GO TO MENU", payload => {
-  state.selectedRoom = '';
+socket.on("GO TO MENU", (payload) => {
+  state.selectedRoom = "";
   state.room = false;
   state.adminRoomsMenu = false;
   state.adminMenu = false;
   state.adminUsersMenu = false;
-  state.chat = false
+  state.chat = false;
   state.menu = true;
-  term.red('--')
-})
+  term.red("--");
+});
 
 socket.on("UPDATE CURRENT ROOM", (payload) => {
   if (payload !== "admins") {
@@ -72,7 +70,7 @@ socket.on("UPDATE CURRENT ROOM", (payload) => {
 });
 
 socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
-  console.log(state.username, state.password)
+  console.log(state.username, state.password);
   socket.emit("HERES MY CREDENTIALS", {
     username: state.username,
     password: state.password,
@@ -81,17 +79,15 @@ socket.on("GIVE ME YOUR CREDENTIALS", (payload) => {
 });
 
 socket.on("SENDING RECENT MESSAGES", (payload) => {
-
   if (state.room) {
     roomMenu(term);
     payload.forEach((message) => {
-      if (message.username === 'admin') {
-        term.green(`\n\t${message.username}: ${message.text}`)
+      if (message.username === "admin") {
+        term.green(`\n\t${message.username}: ${message.text}`);
       } else {
-        term.blue(`\n\t${message.username}: ${message.text}`)
+        term.blue(`\n\t${message.username}: ${message.text}`);
       }
-    }
-    );
+    });
   }
 }); // payload = [message1, message2, ....]
 
@@ -116,15 +112,14 @@ socket.on("CREATED USER", (payload) => {
 socket.on("UPDATE YOUR USER", (payload) => {
   if (payload.username === "admin") {
     term.red("\nyou are an admin");
-    socket.emit("join", { user: payload, room: 'admins' });
+    socket.emit("join", { user: payload, room: "admins" });
   }
   // Very first time we set user when they log in
   state.user = payload;
-
 });
 
 socket.on("GET ALL USERS", (payload) => {
-  console.log("GETTING USERS----", payload)
+  console.log("GETTING USERS----", payload);
 });
 
 socket.on("UPDATE ROOM NAME", (payload) => {
@@ -162,9 +157,9 @@ const askForConnectedUsers = () => {
 
 const leaveRoom = () => {
   term(`You have left: ${state.selectedRoom}`);
-  socket.emit('leave', state.selectedRoom ? state.selectedRoom : '')
-  state.selectedRoom = '';
-}
+  socket.emit("leave", state.selectedRoom ? state.selectedRoom : "");
+  state.selectedRoom = "";
+};
 
 //ask server to give us the most recent messages
 const askForRecentMessages = () => {
@@ -194,14 +189,11 @@ askForUpdatedRooms();
 
 // get mouse clicks and scroll wheel
 term.on("mouse", (name, matches, data) => {
-
   if (name === "MOUSE_RIGHT_BUTTON_PRESSED") {
-
   }
 });
 
 term.on("key", (name, matches, data) => {
-
   if (name === "END" || name === "CTRL_C") {
     terminate(term);
   }
@@ -217,7 +209,7 @@ term.on("key", (name, matches, data) => {
     if (name === "c") {
       state.adminUsersMenu = false;
       state.adminMenu = false;
-      console.log("create user prompt----")
+      console.log("create user prompt----");
       createUserPrompt(term, socket);
     }
 
@@ -225,17 +217,16 @@ term.on("key", (name, matches, data) => {
     if (name === "l") {
       state.adminUsersMenu = false;
       state.adminMenu = false;
-      console.log("view all users------")
+      console.log("view all users------");
       socket.emit("GET ALL USERS", {});
     }
-
   }
 
   if (state.adminRoomsMenu) {
     if (name === "c") {
       state.adminRoomsMenu = false;
       state.adminMenu = false;
-      console.log("create room prompt")
+      console.log("create room prompt");
       createRoomPrompt(term, socket);
     }
 
@@ -243,7 +234,7 @@ term.on("key", (name, matches, data) => {
     if (name === "v") {
       state.adminRoomsMenu = false;
       state.adminMenu = false;
-      console.log("view all rooms-----")
+      console.log("view all rooms-----");
       socket.emit("GET ALL ROOMS", {});
     }
 
@@ -269,15 +260,13 @@ term.on("key", (name, matches, data) => {
     if (name === "v") {
       // no need to change state here
       term.blue(JSON.stringify(state));
-
     }
 
-    if (name === 'u') {
+    if (name === "u") {
       askForConnectedUsers();
     }
 
-    if
-      (name === "u") {
+    if (name === "u") {
       state.adminMenu = false;
       state.adminUsersMenu = true;
       adminRoomsMenu(term);
@@ -310,7 +299,6 @@ term.on("key", (name, matches, data) => {
       // if they are in admin room menu
       adminRoomsMenu(term);
     }
-
   }
 
   /*//? ------------------------------- NORMAL MENUS ------------------------------ */
@@ -325,7 +313,6 @@ term.on("key", (name, matches, data) => {
         state.menu = false;
         //usernamePrompt(term, socket);
       }
-
     }
 
     // if in menu and press r
@@ -342,7 +329,6 @@ term.on("key", (name, matches, data) => {
       state.menu = false;
       usernamePrompt(term, socket);
     }
-
   }
 
   if (state.chat) {
@@ -378,7 +364,7 @@ term.on("key", (name, matches, data) => {
       state.menu = true;
       state.room = false;
       // leave the room in socket server when user exits room menu
-      leaveRoom()
+      leaveRoom();
     }
   }
 });
