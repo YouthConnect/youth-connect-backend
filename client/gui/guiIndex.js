@@ -128,7 +128,6 @@ socket.on("GET ALL USERS", (payload) => {
 socket.on("UPDATE ROOM NAME", (payload) => {
   socket.emit("CREATE ROOM", {
     name: payload,
-    users: null,
     description: `MAIN ROOM ${payload}`,
     minimumAge: 12,
     maxAge: 99,
@@ -269,17 +268,7 @@ term.on("key", (name, matches, data) => {
       askForConnectedUsers();
     }
 
-    if (name === "u") {
-      state.adminMenu = false;
-      state.adminUsersMenu = true;
-      adminRoomsMenu(term);
 
-      if (name === "ESCAPE") {
-        adminMenu(term);
-        state.adminMenu = true;
-        state.adminRoomsMenu = false;
-      }
-    }
 
     //view the state
     if (name === "v") {
