@@ -36,3 +36,6 @@ to run tests, after running `npm i`, run the command `npm test`
 
 - [Github Projects](https://github.com/orgs/YouthConnect/projects/1/views/1)
 
+### ![Backend Service Deployed](https://youth-connect-backend.onrender.com/)
+
+##### ![Client to connect to service](https://github.com/ShadowDraco/youth-connect-backend-client)
