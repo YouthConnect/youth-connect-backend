@@ -16,14 +16,14 @@ const changeState = (payload, socket, recentMessages) => {
 
 const authenticate = async (user, socket) => {
   try {
-  //base64 encode the data in format '${user}:${pass}'
-  let formattedData = base64.encode(`${user.username}:${user.password}`);
-  // send properly formated data to signin route //* in the authorization header as `Basic ${formatedData}`*/
+    //base64 encode the data in format '${user}:${pass}'
+    let formattedData = base64.encode(`${user.username}:${user.password}`);
+    // send properly formated data to signin route //* in the authorization header as `Basic ${formatedData}`*/
     let validatedUser = await axios.post('http://localhost:3001/signin', {}, { headers: { Authorization: `Basic ${formattedData}` } });
 
-  //? return the authenticated users's info (includes their token)
-  socket.emit("UPDATE YOUR USER", validatedUser.data.user);
-  } catch( error) {
+    //? return the authenticated users's info (includes their token)
+    socket.emit("UPDATE YOUR USER", validatedUser.data.user);
+  } catch (error) {
     console.log(error.message)
   }
 };
@@ -34,7 +34,7 @@ const message = async (payload, socket, recentMessages) => {
     try {
 
       const currentRoomMessages = `${payload.room}RecentMessages`;
-  //recentMessages[whatever we wnated it to be] = what we wantit to equal
+      //recentMessages[whatever we wnated it to be] = what we wantit to equal
       //if the message (room specific) queue doesn't exist create it
       if (!recentMessages[currentRoomMessages]) {
         recentMessages[currentRoomMessages] = []
@@ -95,49 +95,74 @@ const receiveMessage = (term, payload, state, valueToUpdate, socket) => {
 };
 
 const createRoom = async (payload, socket) => {
-  let createdRoom = await axios.post(`http://localhost:3001/api/v1/rooms`, {
-    name: payload.name,
-    users: payload.users,
-    description: payload.description,
-    minimumAge: payload.minimumAge,
-    maxAge: payload.maxAge,
-  });
-  socket.emit("CREATED ROOM", createdRoom.data);
-};
-
-const getRoomOptions = async () => {
-  let roomList = await axios.get("http://localhost:3001/api/v1/rooms");
-  return roomList;
-};
-
-const deleteRoom = async (payload, socket) => {
-  let deletedRoom = await axios.delete(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`
-  );
-  socket.emit("DELETED ROOM", deletedRoom);
-};
-
-const updateRoom = async (payload, socket) => {
-  let updatedRoom = await axios.put(
-    `http://localhost:3001/api/v1/rooms/${payload.room}`,
-    {
-      name: payload.room,
+  try {
+    let createdRoom = await axios.post(`http://localhost:3001/api/v1/rooms`, {
+      name: payload.name,
       users: payload.users,
       description: payload.description,
       minimumAge: payload.minimumAge,
       maxAge: payload.maxAge,
-    }
-  );
-  socket.emit("UPDATED ROOM", updatedRoom);
+    });
+    socket.emit("CREATED ROOM", createdRoom.data);
+
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const getRoomOptions = async () => {
+  try {
+    let roomList = await axios.get("http://localhost:3001/api/v1/rooms");
+    return roomList;
+
+  } catch (error) {
+    console.log(error.message);
+  }
+}
+
+const deleteRoom = async (payload, socket) => {
+  try {
+    let deletedRoom = await axios.delete(
+      `http://localhost:3001/api/v2/rooms/${payload.room}`
+    );
+    socket.emit("DELETED ROOM", deletedRoom);
+
+  } catch (error) {
+    console.log(error.message);
+  }
+};
+
+const updateRoom = async (payload, socket) => {
+  try {
+    let updatedRoom = await axios.put(
+      `http://localhost:3001/api/v1/rooms/${payload.room}`,
+      {
+        name: payload.room,
+        users: payload.users,
+        description: payload.description,
+        minimumAge: payload.minimumAge,
+        maxAge: payload.maxAge,
+      }
+    );
+    socket.emit("UPDATED ROOM", updatedRoom);
+
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 const getRoomUsers = async (payload, socket) => {
-  let roomUsers = await axios.get(
-    `http://localhost:3001/api/v2/rooms/${payload.room}`
-  );
-  socket.emit("GOT ROOM USERS", roomUsers);
-  console.log("THIS IS THE ROOM INFORMATION", roomUsers);
-  return roomUsers.users;
+  try {
+    let roomUsers = await axios.get(
+      `http://localhost:3001/api/v2/rooms/${payload.room}`
+    );
+    socket.emit("GOT ROOM USERS", roomUsers);
+    console.log("THIS IS THE ROOM INFORMATION", roomUsers);
+    return roomUsers.users;
+
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 const deleteUserInRoom = (usersInRoom, user) => {
@@ -146,26 +171,36 @@ const deleteUserInRoom = (usersInRoom, user) => {
 };
 
 const createUser = async (payload, socket) => {
-  let createdUser = await axios.post(
-    `http://localhost:3001/api/v1/users`,
-    {
-    username: payload.username,
-    password: payload.password,
-    DOB: payload.DOB,
-    }
-  );
-  socket.emit("CREATED USER", createdUser);
-  console.log("THIS IS THE CREATED USER------------", createdUser);
-  return createdUser;
+  try {
+    let createdUser = await axios.post(
+      `http://localhost:3001/api/v1/users`,
+      {
+        username: payload.username,
+        password: payload.password,
+        DOB: payload.DOB,
+      }
+    );
+    socket.emit("CREATED USER", createdUser);
+    console.log("THIS IS THE CREATED USER------------", createdUser);
+    return createdUser;
+
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 const getUsers = async (payload, socket) => {
-let getAllUsers = await axios.get(
-  `http://localhost:3001/api/v1/users`,
-);
-socket.emit("GET ALL USERS", getAllUsers.data);
-console.log("THIS IS ALL USERS------", getAllUsers.data);
-return getAllUsers.data;
+  try {
+    let getAllUsers = await axios.get(
+      `http://localhost:3001/api/v1/users`,
+    );
+    socket.emit("GET ALL USERS", getAllUsers.data);
+    console.log("THIS IS ALL USERS------", getAllUsers.data);
+    return getAllUsers.data;
+
+  } catch (error) {
+    console.log(error.message);
+  }
 };
 
 

@@ -5,28 +5,33 @@ const { newLine } = require('../lib/index');
 
 //instead of returning user input use socket.emit to control the MAIN terminal
 const usernamePrompt = async (term, socket) => {
+    try {
+        // get username input
+        // send it off, and update the state
+        // get password input
+        // send it off and update the state
 
-    // get username input
-    // send it off, and update the state
-    // get password input
-    // send it off and update the state
+        // complete the login by emitting VERIFY USER
 
-    // complete the login by emitting VERIFY USER
+        newLine(term, false)
 
-    newLine(term, false)
+        term('please enter a username: ') //
 
-    term('please enter a username: ') //
+        let username = await term.inputField(function (error, input) {
 
-    let username = await term.inputField(function (error, input) {
+            term.green("\nYour username is '%s'\n", input)
 
-        term.green("\nYour username is '%s'\n", input)
-
-        socket.emit('UPDATE USERNAME', input)
+            socket.emit('UPDATE USERNAME', input)
 
 
-    }).promise//? Create this input as a promis so it can be awaited and returned
+        }).promise//? Create this input as a promis so it can be awaited and returned
 
-    console.log(username)
+        console.log(username)
+
+    } catch (error) {
+        console.log(error.message);
+    }
+
 };
 
 module.exports = usernamePrompt;
