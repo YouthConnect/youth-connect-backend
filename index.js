@@ -69,13 +69,18 @@ io.on("connection", (socket) => {
   /* //?------------------------------ HANDLE ROOMS ------------------------------ */
 
   socket.on("CREATE ROOM", async (payload) => {
-    //TODO - create a room in the database
-    createRoom(payload, socket);
-    //TODO - update the room options
-    let roomList = await getRoomOptions();
-    //TODO - send the updated room options to the client
+    try {
+      //TODO - create a room in the database
+      createRoom(payload, socket);
+      //TODO - update the room options
+      let roomList = await getRoomOptions();
+      //TODO - send the updated room options to the client
 
-    socket.emit("UPDATED ROOMS", roomList.data);
+      socket.emit("UPDATED ROOMS", roomList.data);
+
+    } catch (error) {
+      console.log(error.message);
+    }
   });
 
   socket.on("GIVE ME UPDATED ROOMS", async (payload) => {
@@ -86,32 +91,37 @@ io.on("connection", (socket) => {
   // TODO handle join room event
 
   socket.on("join", async (payload) => {
-    let roomList = await getRoomOptions();
-    let rooms = roomList.data;
-    // this returns and array, not an object
-    let room = rooms.filter((room) => room.name === payload.room);
-    let currentRoom = room[0];
+    try {
+      let roomList = await getRoomOptions();
+      let rooms = roomList.data;
+      // this returns and array, not an object
+      let room = rooms.filter((room) => room.name === payload.room);
+      let currentRoom = room[0];
 
-    let today = new Date();
-    let age = today.getFullYear() - parseInt(payload.user.DOB.split("/"));
+      let today = new Date();
+      let age = today.getFullYear() - parseInt(payload.user.DOB.split("/"));
 
-    if (payload.room === "admins") {
-      socket.join(payload.room);
-    } else {
-      // check if they have permission join
-
-      if (
-        (age > currentRoom.minimumAge && age < currentRoom.maxAge) ||
-        payload.user.username === "admin"
-      ) {
-        console.log("You can enter this room");
-        socket.emit("UPDATE CURRENT ROOM", payload.room);
+      if (payload.room === "admins") {
         socket.join(payload.room);
-        console.log(`${socket.id} joined the ${payload.room} room.`);
       } else {
-        console.log("you cant enter");
-        socket.emit("GO TO MENU", {});
+        // check if they have permission join
+
+        if (
+          (age > currentRoom.minimumAge && age < currentRoom.maxAge) ||
+          payload.user.username === "admin"
+        ) {
+          console.log("You can enter this room");
+          socket.emit("UPDATE CURRENT ROOM", payload.room);
+          socket.join(payload.room);
+          console.log(`${socket.id} joined the ${payload.room} room.`);
+        } else {
+          console.log("you cant enter");
+          socket.emit("GO TO MENU", {});
+        }
       }
+
+    } catch (error) {
+      console.log(error.message);
     }
   });
 
@@ -174,11 +184,16 @@ io.on("connection", (socket) => {
   /* //?----------------------------- HANDLE MESSAGES ---------------------------- */
 
   socket.on("MESSAGE", async (payload) => {
-    // use the 'middleware'
-    await message(payload, socket, recentMessages);
+    try {
+      // use the 'middleware'
+      await message(payload, socket, recentMessages);
 
-    // when server receives a message, make the client start their prompt so it continues the cycle
-    socket.emit("GO BACK TO ROOM", {});
+      // when server receives a message, make the client start their prompt so it continues the cycle
+      socket.emit("GO BACK TO ROOM", {});
+
+    } catch (error) {
+      console.log(error.message);
+    }
   });
 
   // handle giving the recent messages to the client

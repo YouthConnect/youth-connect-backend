@@ -4,20 +4,25 @@
 const { newLine } = require('../lib/index');
 
 const createUserPrompt = async (term, socket) => {
+    try {
+        newLine(term, false)
 
-    newLine(term, false)
+        term('please enter a user name: ') //
 
-    term('please enter a user name: ') //
+        let username = await term.inputField(function (error, input) {
 
-    let username = await term.inputField(function (error, input) {
+            term.green("\nYour user name is '%s'\n", input)
 
-        term.green("\nYour user name is '%s'\n", input)
+            socket.emit('UPDATE USER NAME', input)
 
-        socket.emit('UPDATE USER NAME', input)
+        }).promise//? Create this input as a promis so it can be awaited and returned
 
-    }).promise//? Create this input as a promis so it can be awaited and returned
+        console.log(username)
 
-    console.log(username)
+    } catch (error) {
+        console.log(error.message);
+    }
+
 };
 
 module.exports = createUserPrompt;
