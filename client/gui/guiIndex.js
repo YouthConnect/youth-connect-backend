@@ -1,10 +1,13 @@
+require("dotenv").config();
+const PORT = process.env.PORT;
+const BACKEND_URL = process.env.BACKEND_URL
 //? Create a terminal interface that uses functions and sockets to manage its state (menu, prompting, sending and receiving data etc)
 // create the terminal instance
 const term = require("terminal-kit").terminal;
 // create a socket client and give it functions
 //? Client socket hub
 const { io } = require("socket.io-client");
-const socket = io("http://localhost:3001");
+const socket = io(`http://localhost:3001`);
 
 //? require functions from the socket client lib that contains basic handlers for our socket client
 const { changeState } = require("../../socketHandlers/handlerIndex");
