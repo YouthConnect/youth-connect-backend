@@ -258,12 +258,6 @@ term.on("key", (name, matches, data) => {
       // roomPrompt(term, state.roomOptions, socket);
     }
 
-    //view the state
-    if (name === "v") {
-      // no need to change state here
-      term.blue(JSON.stringify(state));
-    }
-
     if (name === "u") {
       askForConnectedUsers();
     }
@@ -282,6 +276,7 @@ term.on("key", (name, matches, data) => {
       state.adminMenu = false;
       state.menu = true;
     }
+
     if (state.adminUsersMenu) {
       // if they are in admin room menu
       adminUsersMenu(term);
