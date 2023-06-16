@@ -108,7 +108,7 @@ io.on("connection", (socket) => {
 
         if (
           (age > currentRoom.minimumAge && age < currentRoom.maxAge) ||
-          payload.user.username === "admin"
+          payload.user.role === "admin"
         ) {
           console.log("You can enter this room");
           socket.emit("UPDATE CURRENT ROOM", payload.room);
