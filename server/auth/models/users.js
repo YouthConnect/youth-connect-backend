@@ -8,7 +8,7 @@ const axios = require("axios");
 const SECRET = process.env.SECRET || "secretstring";
 
 const userModel = (sequelize, DataTypes) => {
-  const model = sequelize.define("Users", {
+  const model = sequelize.define("ConnectUsers", {
     username: { type: DataTypes.STRING, required: true, unique: true },
     password: { type: DataTypes.STRING, required: true },
     role: {
@@ -50,7 +50,6 @@ const userModel = (sequelize, DataTypes) => {
     try {
       let hashedPass = await bcrypt.hash(user.password, 10);
       user.password = hashedPass;
-
     } catch (error) {
       console.log(error.message);
     }
@@ -58,17 +57,15 @@ const userModel = (sequelize, DataTypes) => {
 
   model.authenticateBasic = async function (username, password) {
     try {
-      console.log(username, password)
+      console.log(username, password);
       const user = await this.findOne({ where: { username } });
       const valid = await bcrypt.compare(password, user.password);
       if (valid) {
-        console.log('VALID USER')
+        console.log("VALID USER");
         return user;
       }
-
     } catch (error) {
       console.log("Invalid User");
-
     }
   };
 
