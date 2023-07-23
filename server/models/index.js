@@ -6,14 +6,14 @@ const userModel = require("../auth/models/users.js");
 const roomModel = require("./rooms/model.js");
 const messageModel = require("./messages/model.js");
 const Collection = require("./data-collection.js");
+const imageModel = require("./images/model.js");
 
-const DATABASE_URL = process.env.DATABASE_URL || "sqlite::memory:";
-
-console.log("\n\n\n\nDATABASE_URL\n", DATABASE_URL);
+const DATABASE_URL = process.env.DATABASE_URL || "sqlite:memory:";
 
 const sequelize = new Sequelize(DATABASE_URL);
 const rooms = roomModel(sequelize, DataTypes);
 const messages = messageModel(sequelize, DataTypes);
+const images = imageModel(sequelize, DataTypes);
 const users = userModel(sequelize, DataTypes);
 
 module.exports = {
@@ -24,6 +24,7 @@ module.exports = {
   users: new Collection(users),
   rooms: new Collection(rooms),
   roomsModule: rooms,
+  images: new Collection(images),
   // ? Auth route is made to use raw models
   userModule: users, //* Use both */
 };

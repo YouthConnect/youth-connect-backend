@@ -37,9 +37,8 @@ async function handleGetAll(req, res) {
   try {
     let allRecords = await req.model.get();
     res.status(200).json(allRecords);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
@@ -48,9 +47,8 @@ async function handleGetOne(req, res) {
     const id = req.params.id;
     let theRecord = await req.model.get(id);
     res.status(200).json(theRecord);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
@@ -59,9 +57,8 @@ async function handleCreate(req, res) {
     let obj = req.body;
     let newRecord = await req.model.create(obj);
     res.status(201).json(newRecord);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
@@ -71,9 +68,8 @@ async function handleUpdate(req, res) {
     const obj = req.body;
     let updatedRecord = await req.model.update(id, obj);
     res.status(200).json(updatedRecord);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
@@ -82,9 +78,8 @@ async function handleDelete(req, res) {
     let id = req.params.id;
     let deletedRecord = await req.model.delete(id);
     res.status(200).json(deletedRecord);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
@@ -93,9 +88,8 @@ async function handleCreateRoom(req, res) {
     let roomData = req.body;
     let newRoom = await Room.create(roomData);
     res.status(201).json(newRoom);
-
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
   }
 }
 
