@@ -14,7 +14,6 @@ const io = new Server(server);
 const { db } = require("./server/models/index.js");
 
 const { message } = require("./socketHandlers/handlerIndex.js");
-const { imageModule } = require("./server/models/index.js");
 
 //create a feed of only the most recent messages from the database in real time
 let recentMessages = {};

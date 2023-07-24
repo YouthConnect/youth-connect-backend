@@ -2,10 +2,10 @@
 
 const axios = require("axios");
 
-const { v4: uuidv4 } = require("uuid");
 const Filter = require("bad-words");
 const filter1 = new Filter();
 const filter2 = require("leo-profanity");
+import { imageModule } from "../server/models";
 
 // HANDLE MESSAGES ON THE SERVER SIDE
 const message = async (payload, socket, isImage, recentMessages) => {
@@ -67,12 +67,11 @@ const message = async (payload, socket, isImage, recentMessages) => {
             `http://localhost:3001/api/v1/messages`,
             newMessage
           );
+          console.log("This is the created message:", createdMessage.data.text);
         }
       } catch (error) {
         console.log("ERROR ADDING MESSAGE OR IMAGE TO DATABASE:", error);
       }
-
-      console.log("This is the created message:", createdMessage.data.text);
     } catch (error) {
       console.log("Error creating collection object:", error);
     }
