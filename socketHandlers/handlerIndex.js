@@ -59,7 +59,7 @@ const message = async (payload, socket, isImage, recentMessages) => {
             const imageRecord = await imageModule.create(payload);
             // send image back to everyone
             console.log("Image Record", imageRecord);
-            socket.emit("MESSAGE", imageRecord);
+            socket.emit("NEW MESSAGE", imageRecord);
           } catch (error) {
             console.log("Error creating new image", error);
           }
