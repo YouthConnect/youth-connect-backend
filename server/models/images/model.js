@@ -2,7 +2,7 @@
 
 const imageModel = (sequelize, DataTypes) =>
   sequelize.define("Images", {
-    image: { type: DataTypes.JSON, required: true },
+    image: { type: DataTypes.ARRAY(DataTypes.JSON), required: true },
     room: { type: DataTypes.STRING, required: true },
     username: { type: DataTypes.STRING, required: true },
   });

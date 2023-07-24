@@ -54,7 +54,6 @@ io.on("connection", (socket) => {
   socket.on("IMAGE", async (payload) => {
     // create image
     try {
-      console.log("Image Payload:", payload);
       const imageRecord = await imageModule.create(payload);
       // send image back to everyone
       console.log("Image Record", imageRecord);
