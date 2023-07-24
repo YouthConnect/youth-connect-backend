@@ -54,7 +54,7 @@ authRouter.put(
   async (req, res, next) => {
     const id = req.params.id;
     try {
-      const userRecord = await userModule.findOneAndUpdate({ where: { id } });
+      const userRecord = await userModule.update({ where: { id } });
       console.log("user record", userRecord);
       userRecord.update({ approved: true });
       res.status(200);
