@@ -7,6 +7,7 @@ const { userModule } = require("../models/index.js");
 const basicAuth = require("./middleware/basic.js");
 const bearerAuth = require("./middleware/bearer.js");
 const permissions = require("./middleware/acl.js");
+const bearer = require("./middleware/bearer.js");
 
 authRouter.post("/signup", async (req, res, next) => {
   try {
@@ -56,9 +57,22 @@ authRouter.put(
       const userRecord = await userModule.findOneAndUpdate({ where: { id } });
 
       userRecord.update({ approved: true });
+      res.status(200);
     } catch (err) {
       console.log("ERROR APPROVING USER: ", err);
     }
+  }
+);
+
+authRouter.get(
+  "/users/unapproved",
+  bearerAuth,
+  permissions("delete"),
+  async (req, res, next) => {
+    const userRecords = await userModule.findAll({
+      where: { approved: false },
+    });
+    res.status(200).json(userRecords);
   }
 );
 
