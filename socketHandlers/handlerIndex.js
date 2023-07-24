@@ -49,8 +49,9 @@ const message = async (payload, socket, isImage, recentMessages) => {
         console.log("removed message from last 30:", lastMessage);
       }
 
-      socket.to(payload.room).emit("NEW MESSAGE", newMessage);
-
+      if (!isImage) {
+        socket.to(payload.room).emit("NEW MESSAGE", newMessage);
+      }
       //* Then send it to database */
       try {
         if (isImage) {
@@ -58,16 +59,23 @@ const message = async (payload, socket, isImage, recentMessages) => {
             const imageRecord = await imageModule.create(payload);
             // send image back to everyone
             console.log("Image Record", imageRecord);
-            socket.emit("NEW IMAGE", imageRecord);
+            socket.emit("MESSAGE", imageRecord);
           } catch (error) {
             console.log("Error creating new image", error);
           }
         } else {
-          let createdMessage = await axios.post(
-            `http://localhost:3001/api/v1/messages`,
-            newMessage
-          );
-          console.log("This is the created message:", createdMessage.data.text);
+          try {
+            let createdMessage = await axios.post(
+              `http://localhost:3001/api/v1/messages`,
+              newMessage
+            );
+            console.log(
+              "This is the created message:",
+              createdMessage.data.text
+            );
+          } catch (error) {
+            console.log("ERROR CREATING MESSAGE", error);
+          }
         }
       } catch (error) {
         console.log("ERROR ADDING MESSAGE OR IMAGE TO DATABASE:", error);
