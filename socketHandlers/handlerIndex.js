@@ -21,7 +21,7 @@ const message = async (payload, socket, isImage, recentMessages) => {
 
       if (isImage) {
         newMessage = {
-          text: "Image " + payload.image[7],
+          text: "Image " + payload.image[0].uri,
           username: payload.username,
           room: payload.room,
         };
