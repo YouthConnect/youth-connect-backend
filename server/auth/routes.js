@@ -69,10 +69,14 @@ authRouter.get(
   bearerAuth,
   permissions("delete"),
   async (req, res, next) => {
-    const userRecords = await userModule.findAll({
-      where: { approved: false },
-    });
-    res.status(200).json(userRecords);
+    try {
+      const userRecords = await userModule.findAll({
+        where: { approved: false },
+      });
+      res.status(200).json(userRecords);
+    } catch (error) {
+      console.log("ERROR FETCHING UNAPPROVED USERS", error);
+    }
   }
 );
 

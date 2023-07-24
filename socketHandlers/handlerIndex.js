@@ -8,23 +8,33 @@ const filter1 = new Filter();
 const filter2 = require("leo-profanity");
 
 // HANDLE MESSAGES ON THE SERVER SIDE
-const message = async (payload, socket, recentMessages) => {
+const message = async (payload, socket, isImage, recentMessages) => {
   if (payload.text !== "") {
     try {
+      let newMessage = {};
+
       const currentRoomMessages = `${payload.room}RecentMessages`;
       //if the message (room specific) queue doesn't exist create it
       if (!recentMessages[currentRoomMessages]) {
         recentMessages[currentRoomMessages] = [];
       }
 
-      let cleanWords1 = filter1.clean(payload.text);
-      let cleanWords2 = filter2.clean(cleanWords1);
+      if (isImage) {
+        newMessage = {
+          text: "Image " + payload.image.uri,
+          username: payload.username,
+          room: payload.room,
+        };
+      } else {
+        let cleanWords1 = filter1.clean(payload.text);
+        let cleanWords2 = filter2.clean(cleanWords1);
 
-      const newMessage = {
-        text: cleanWords2,
-        room: payload.room,
-        username: payload.username,
-      };
+        newMessage = {
+          text: cleanWords2,
+          room: payload.room,
+          username: payload.username,
+        };
+      }
 
       //* Then send it to the other clients */
 
@@ -39,13 +49,20 @@ const message = async (payload, socket, recentMessages) => {
         console.log("removed message from last 30:", lastMessage);
       }
 
-      socket.to(payload.room).emit("NEW MESSAGE", message);
+      socket.to(payload.room).emit("NEW MESSAGE", newMessage);
 
       //* Then send it to database */
-      let createdMessage = await axios.post(
-        `http://localhost:3001/api/v1/messages`,
-        newMessage
-      );
+      try {
+        if (isImage) {
+        } else {
+          let createdMessage = await axios.post(
+            `http://localhost:3001/api/v1/messages`,
+            newMessage
+          );
+        }
+      } catch (error) {
+        console.log("ERROR ADDING MESSAGE OR IMAGE TO DATABASE:", error);
+      }
 
       console.log("This is the created message:", createdMessage.data.text);
     } catch (error) {

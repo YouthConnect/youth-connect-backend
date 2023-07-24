@@ -48,19 +48,7 @@ io.on("connection", (socket) => {
   socket.on("MESSAGE", async (payload) => {
     // use the 'middleware'
     console.log("new message: ", payload);
-    await message(payload, socket, recentMessages);
-  });
-
-  socket.on("IMAGE", async (payload) => {
-    // create image
-    try {
-      const imageRecord = await imageModule.create(payload);
-      // send image back to everyone
-      console.log("Image Record", imageRecord);
-      socket.emit("NEW IMAGE", imageRecord);
-    } catch (error) {
-      console.log("Error creating new image", error);
-    }
+    await message(payload, socket, payload.isImage, recentMessages);
   });
 
   // handle giving the recent messages to the client
