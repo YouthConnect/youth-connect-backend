@@ -5,7 +5,7 @@ const axios = require("axios");
 const Filter = require("bad-words");
 const filter1 = new Filter();
 const filter2 = require("leo-profanity");
-import { imageModule } from "../server/models";
+const { imageModule } = require("../server/models");
 
 // HANDLE MESSAGES ON THE SERVER SIDE
 const message = async (payload, socket, isImage, recentMessages) => {
