@@ -54,6 +54,14 @@ const message = async (payload, socket, isImage, recentMessages) => {
       //* Then send it to database */
       try {
         if (isImage) {
+          try {
+            const imageRecord = await imageModule.create(payload);
+            // send image back to everyone
+            console.log("Image Record", imageRecord);
+            socket.emit("NEW IMAGE", imageRecord);
+          } catch (error) {
+            console.log("Error creating new image", error);
+          }
         } else {
           let createdMessage = await axios.post(
             `http://localhost:3001/api/v1/messages`,
