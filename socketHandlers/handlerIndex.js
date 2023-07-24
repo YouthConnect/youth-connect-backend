@@ -52,7 +52,7 @@ const message = async (payload, socket, isImage, recentMessages) => {
       if (!isImage) {
         socket.to(payload.room).emit("NEW MESSAGE", newMessage);
       } else {
-        socket.in(payload.room).emit("NEW MESSAGE", newMessage);
+        socket.emit("NEW MESSAGE", newMessage);
       }
       //* Then send it to database */
       try {
