@@ -49,8 +49,11 @@ const message = async (payload, socket, isImage, recentMessages) => {
         console.log("removed message from last 30:", lastMessage);
       }
 
-      socket.to(payload.room).emit("NEW MESSAGE", newMessage);
-
+      if (!isImage) {
+        socket.to(payload.room).emit("NEW MESSAGE", newMessage);
+      } else {
+        socket.in(payload.room).emit("NEW MESSAGE", newMessage);
+      }
       //* Then send it to database */
       try {
         if (isImage) {
