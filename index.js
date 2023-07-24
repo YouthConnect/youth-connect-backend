@@ -14,6 +14,7 @@ const io = new Server(server);
 const { db } = require("./server/models/index.js");
 
 const { message } = require("./socketHandlers/handlerIndex.js");
+const { imageModule } = require("./server/models/index.js");
 
 //create a feed of only the most recent messages from the database in real time
 let recentMessages = {};
@@ -47,6 +48,19 @@ io.on("connection", (socket) => {
   socket.on("MESSAGE", async (payload) => {
     // use the 'middleware'
     await message(payload, socket, recentMessages);
+  });
+
+  socket.on("IMAGE", async (payload) => {
+    // create image
+    try {
+      console.log("Image Payload:", payload);
+      const imageRecord = await imageModule.create(payload);
+      // send image back to everyone
+      console.log("Image Record", imageRecord);
+      socket.emit("NEW IMAGE", imageRecord);
+    } catch (error) {
+      console.log("Error creating new image", error);
+    }
   });
 
   // handle giving the recent messages to the client
