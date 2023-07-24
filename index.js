@@ -47,6 +47,7 @@ io.on("connection", (socket) => {
 
   socket.on("MESSAGE", async (payload) => {
     // use the 'middleware'
+    console.log("new message: ", payload);
     await message(payload, socket, recentMessages);
   });
 
