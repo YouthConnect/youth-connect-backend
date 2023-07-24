@@ -49,17 +49,15 @@ const message = async (payload, socket, isImage, recentMessages) => {
         console.log("removed message from last 30:", lastMessage);
       }
 
-      if (!isImage) {
-        socket.to(payload.room).emit("NEW MESSAGE", newMessage);
-      }
+      socket.to(payload.room).emit("NEW MESSAGE", newMessage);
+
       //* Then send it to database */
       try {
         if (isImage) {
           try {
             const imageRecord = await imageModule.create(payload);
             // send image back to everyone
-            console.log("Image Record", imageRecord);
-            socket.emit("NEW MESSAGE", imageRecord);
+            console.log("Image Record created!");
           } catch (error) {
             console.log("Error creating new image", error);
           }
