@@ -2,7 +2,6 @@
 
 const messageModel = (sequelize, DataTypes) =>
   sequelize.define("Messages", {
-    id: { type: DataTypes.STRING, required: true },
     text: { type: DataTypes.STRING, required: true },
     room: { type: DataTypes.STRING, required: true },
     username: { type: DataTypes.STRING, required: true },

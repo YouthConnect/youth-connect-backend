@@ -21,7 +21,6 @@ const message = async (payload, socket, recentMessages) => {
       let cleanWords2 = filter2.clean(cleanWords1);
 
       const newMessage = {
-        id: uuidv4(),
         text: cleanWords2,
         room: payload.room,
         username: payload.username,
