@@ -51,7 +51,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("DELETE_MESSAGE", async (payload) => {
-    let currentRoom = `${room}RecentMessages`;
+    let currentRoom = `${payload.room}RecentMessages`;
     console.log(recentMessages[currentRoom]);
     recentMessages[currentRoom].splice(payload.messageId, 1);
   });
