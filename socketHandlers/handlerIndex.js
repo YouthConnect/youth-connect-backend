@@ -47,21 +47,29 @@ const message = async (payload, socket, isImage, recentMessages) => {
 
       if (isImage) {
         let newImage = {
-          image: payload.image,
+          image: payload.image, // result
           username: payload.username,
           room: payload.room,
         };
         const imageRecord = await imageModule.create(newImage);
         // send image back to everyone
         console.log("Image Record created!", imageRecord);
+
         let createdImage = imageRecord.toJSON();
-        console.log(createdImage);
+
+        console.log("CREATED IMAGE: ", createdImage);
+
+        console.log("IMAGE.IMAGE.TOJSON:", createdImage.image.toJSON());
+        
         let newMessage = {
           text: "Image ",
-          image: createdImage.toJSON(),
+          image: createdImage.image.toJSON(),
           username: payload.username,
           room: payload.room,
         };
+
+        console.log("FINISHED IMAGE MESSAGE: ", newMessage);
+
         socket.emit("NEW MESSAGE", newMessage);
       } else {
         try {
