@@ -58,7 +58,7 @@ const message = async (payload, socket, isImage, recentMessages) => {
         console.log(createdImage);
         let newMessage = {
           text: "Image ",
-          image: createdImage,
+          image: createdImage.toJSON(),
           username: payload.username,
           room: payload.room,
         };
