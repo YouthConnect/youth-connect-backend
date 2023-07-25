@@ -46,14 +46,19 @@ const message = async (payload, socket, isImage, recentMessages) => {
       //* Then send it to database */
 
       if (isImage) {
-        const imageRecord = await imageModule.create(payload);
+        let newImage = {
+          image: payload.image,
+          username: payload.username,
+          room: payload.room,
+        };
+        const imageRecord = await imageModule.create(newImage);
         // send image back to everyone
         console.log("Image Record created!", imageRecord);
-        let image = imageRecord.toJSON();
-        console.log(image);
+        let createdImage = imageRecord.toJSON();
+        console.log(createdImage);
         let newMessage = {
           text: "Image ",
-          image: image,
+          image: createdImage,
           username: payload.username,
           room: payload.room,
         };
