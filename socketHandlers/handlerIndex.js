@@ -48,8 +48,10 @@ const message = async (payload, socket, isImage, recentMessages) => {
     }
 
     if (!isImage) {
+      console.log("sending new messgae:", newMessage);
       socket.to(payload.room).emit("NEW MESSAGE", newMessage);
     } else {
+      console.log("sending new image:", newMessage);
       socket.emit("NEW MESSAGE", newMessage);
     }
     try {
