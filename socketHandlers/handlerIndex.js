@@ -19,6 +19,11 @@ const message = async (payload, socket, isImage, recentMessages) => {
     }
 
     if (isImage) {
+      newMessage = {
+        text: payload.text,
+        room: payload.room,
+        username: payload.username,
+      };
     } else {
       let cleanWords1 = filter1.clean(payload.text);
       let cleanWords2 = filter2.clean(cleanWords1);
@@ -43,9 +48,22 @@ const message = async (payload, socket, isImage, recentMessages) => {
     if (!isImage) {
       socket.to(payload.room).emit("NEW MESSAGE", newMessage);
     } else {
-      //* Then send it to database */
+      socket.emit("NEW MESSAGE", newMessage);
+    }
+    try {
+      let createdMessage = await axios.post(
+        `http://localhost:3001/api/v1/messages`,
+        newMessage
+      );
+      console.log("This is the created message:", createdMessage.data.text);
+    } catch (error) {
+      console.log("ERROR CREATING MESSAGE", error);
+    }
+  }
+  //} else {
+  //* Then send it to database */
 
-      if (isImage) {
+  /* if (isImage) {
         let newImage = {
           image: payload.image, // result
           username: payload.username,
@@ -74,19 +92,7 @@ const message = async (payload, socket, isImage, recentMessages) => {
         console.log("FINISHED IMAGE MESSAGE: ", newMessage);
 
         socket.emit("NEW MESSAGE", newMessage);
-      } else {
-        try {
-          let createdMessage = await axios.post(
-            `http://localhost:3001/api/v1/messages`,
-            newMessage
-          );
-          console.log("This is the created message:", createdMessage.data.text);
-        } catch (error) {
-          console.log("ERROR CREATING MESSAGE", error);
-        }
-      }
-    }
-  }
+      } else {*/
 };
 
 const createRoom = async (payload, socket) => {
