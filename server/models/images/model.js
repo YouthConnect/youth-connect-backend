@@ -2,7 +2,7 @@
 
 const imageModel = (sequelize, DataTypes) =>
   sequelize.define("Images", {
-    image: { type: DataTypes.STRING, required: true },
+    image: { type: DataTypes.BLOB("long"), required: true },
     room: { type: DataTypes.STRING, required: true },
     username: { type: DataTypes.STRING, required: true },
   });

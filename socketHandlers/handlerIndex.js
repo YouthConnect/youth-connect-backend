@@ -20,11 +20,6 @@ const message = async (payload, socket, isImage, recentMessages) => {
       }
 
       if (isImage) {
-        newMessage = {
-          text: "Image " + payload.image,
-          username: payload.username,
-          room: payload.room,
-        };
       } else {
         let cleanWords1 = filter1.clean(payload.text);
         let cleanWords2 = filter2.clean(cleanWords1);
@@ -38,8 +33,6 @@ const message = async (payload, socket, isImage, recentMessages) => {
 
       //* Then send it to the other clients */
 
-      // push the message just submitted
-      recentMessages[currentRoomMessages].push(newMessage);
 
       // create and manage a list of most recent messages //? so they can be displayed in the terminal
 
@@ -52,15 +45,23 @@ const message = async (payload, socket, isImage, recentMessages) => {
       if (!isImage) {
         socket.to(payload.room).emit("NEW MESSAGE", newMessage);
       } else {
-        socket.emit("NEW MESSAGE", newMessage);
-      }
+
       //* Then send it to database */
       try {
         if (isImage) {
           try {
             const imageRecord = await imageModule.create(payload);
             // send image back to everyone
-            console.log("Image Record created!");
+            console.log("Image Record created!", imageRecord);
+            let image = imageRecord.toJSON()
+            console.log(image)
+            let newMessage = {
+              text: 'Image ',
+              image: image,
+              username: payload.username,
+              room: payload.room
+            }
+            socket.emit("NEW MESSAGE", newMessage);
           } catch (error) {
             console.log("Error creating new image", error);
           }
