@@ -50,6 +50,12 @@ io.on("connection", (socket) => {
     await message(payload, socket, payload.isImage, recentMessages);
   });
 
+  socket.on("DELETE_MESSAGE", async (payload) => {
+    let currentRoom = `${room}RecentMessages`;
+    console.log(recentMessages[currentRoom]);
+    recentMessages[currentRoom].splice(payload.messageId, 1);
+  });
+
   // handle giving the recent messages to the client
   socket.on("GET RECENT MESSAGES", (payload) => {
     let messagePayload;
