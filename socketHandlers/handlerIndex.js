@@ -37,6 +37,8 @@ const message = async (payload, socket, isImage, recentMessages) => {
 
     //* Then send it to the other clients */
 
+    recentMessages[currentRoomMessages].push(newMessage);
+
     // create and manage a list of most recent messages //? so they can be displayed in the terminal
 
     if (recentMessages[currentRoomMessages].length > 30) {
